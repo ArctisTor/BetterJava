@@ -1,0 +1,9 @@
+spring.mvc.converters.preferred-json-mapper=gson
+
+server.port=9000
+
+#postgres information
+postgres.host=
+postgres.port=
+postgres.user=
+postgres.password=

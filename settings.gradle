@@ -1,0 +1,6 @@
+rootProject.name = 'BetterJava'
+include 'postgres'
+include 'BetterJavaApplication'
+include 'Sample'
+include 'core'
+
