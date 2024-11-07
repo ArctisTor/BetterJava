@@ -1,9 +1,14 @@
 package org.betterJavaApplication.service;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.constants.PostgresQueryStatements;
+import org.betterJavaApplication.entity.TalentEntity;
+import org.betterJavaApplication.repository.TalentRepository;
 import org.constants.VTuberConstants;
 import org.object.Talent;
 import org.service.VTuberService;
@@ -20,10 +25,13 @@ import java.util.List;
 public class PostgresVTuberService implements VTuberService {
 
     private final PostgresConnector postgresConnector;
+    private final TalentRepository talentRepository;
+    private final Gson gson = new Gson();
 
     @Autowired
-    public PostgresVTuberService(PostgresConnector postgresConnector) {
+    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository) {
         this.postgresConnector = postgresConnector;
+        this.talentRepository = talentRepository;
     }
 
     @PostConstruct
@@ -39,13 +47,49 @@ public class PostgresVTuberService implements VTuberService {
     @Override
     public List<Talent> getAllVTubers() {
 
-        try (Statement stmt = this.postgresConnector.getPostgresConnection().createStatement()){
-            return vtuberResultSetMapping(stmt.executeQuery(PostgresQueryStatements.SELECT_ALL_VTUBERS));
-        } catch (SQLException e) {
-            System.out.println("Error with querying database: " + e.getMessage());
-        }
+//        try (Statement stmt = this.postgresConnector.getPostgresConnection().createStatement()){
+//            return vtuberResultSetMapping(stmt.executeQuery(PostgresQueryStatements.SELECT_ALL_VTUBERS));
+//        } catch (SQLException e) {
+//            System.out.println("Error with querying database: " + e.getMessage());
+//        }
 
-        return List.of();
+        List<Talent> talentList = new ArrayList<>();
+        Iterable<TalentEntity> itr = this.talentRepository.findAll();
+        itr.forEach(talentEntity -> {
+            talentList.add(talentEntityMapping(talentEntity));
+        });
+
+        return talentList;
+    }
+
+    @Override
+    public List<Talent> getByOrganization(String orgName) {
+        List<TalentEntity> list = this.talentRepository.findByOrganization(orgName);
+        return talentEntityListMapping(list);
+    }
+
+    private List<Talent> talentEntityListMapping(List<TalentEntity> te) {
+        List<Talent> talentList = new ArrayList<>();
+
+        te.forEach(talentEntity -> {
+            talentList.add(talentEntityMapping(talentEntity));
+        });
+
+        return talentList;
+    }
+
+    private Talent talentEntityMapping(TalentEntity te)  {
+        Talent vTuber = new Talent();
+        vTuber.setId(te.getTalent_id());
+        vTuber.setName(te.getTalent_name());
+        vTuber.setDebut(te.getTalent_debut());
+        vTuber.setBirthday(te.getTalent_birthday());
+        vTuber.setOrganization(te.getTalent_organization());
+        vTuber.setUnit(te.getTalent_unit());
+        vTuber.setHeight(te.getTalent_height());
+        vTuber.setFanName(te.getTalent_fan_name());
+
+        return vTuber;
     }
 
 

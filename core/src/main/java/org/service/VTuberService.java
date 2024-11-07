@@ -7,4 +7,5 @@ import java.util.List;
 public interface VTuberService {
 
     public List<Talent> getAllVTubers();
+    public List<Talent> getByOrganization(String orgName);
 }
