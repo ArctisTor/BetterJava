@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/BetterJavaApplication" />
             <option value="$PROJECT_DIR$/Sample" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/docker" />
             <option value="$PROJECT_DIR$/postgres" />
           </set>
         </option>

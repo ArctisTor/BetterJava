@@ -1,0 +1,22 @@
+services:
+  #betterjava:
+    #build: .
+    #ports:
+     # - "8080:9000"
+    #depends_on:
+     # - postgres_db
+    #environment:
+     # POSTGRES_PASSWORD : admin
+     # POSTGRES_USER : admin
+  postgres_db:
+    image: 'postgres:13.1-alpine'
+    container_name: postgres_db
+    ports:
+      - "9001:5432"
+    environment:
+      POSTGRES_USER : admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DATABASE : VTubers
+    volumes:
+    - ./data:/var/lib/mysql
+    - ./VTubers.sql:/docker-entrypoint-initdb.d/VTubers.sql

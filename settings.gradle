@@ -3,4 +3,5 @@ include 'postgres'
 include 'BetterJavaApplication'
 include 'Sample'
 include 'core'
+include 'docker'
 
