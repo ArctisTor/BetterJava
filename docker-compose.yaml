@@ -9,14 +9,16 @@ services:
      # POSTGRES_PASSWORD : admin
      # POSTGRES_USER : admin
   postgres_db:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:17'
+    restart: always
     container_name: postgres_db
     ports:
       - "9001:5432"
     environment:
       POSTGRES_USER : admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DATABASE : VTubers
+      POSTGRES_DB: VTubers
+      PGDATA: /var/lib/postgresql@17/data/VTubers
     volumes:
     - ./data:/var/lib/mysql
     - ./VTubers.sql:/docker-entrypoint-initdb.d/VTubers.sql
