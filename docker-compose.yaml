@@ -1,26 +1,47 @@
-version: "3.8"
+networks:
+  betterjava_network :
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
 services:
-  #betterjava:
-    #build: . # /path/to/dockerfile or https://github.com/my-company/my-project.git
-    #image: betterjava-image #name of the image
-    #ports:
-     # - "8080:9000"
-    #depends_on:
-     # - postgres_db
-    #environment:
-     # POSTGRES_PASSWORD : admin
-     # POSTGRES_USER : admin
+  betterjava:
+   build: . # /path/to/dockerfile or https://github.com/my-company/my-project.git
+   image: betterjava-image #name of the image
+   ports:
+    - "8080:9000"
+   depends_on:
+    postgres_db:
+      condition: service_healthy
+   environment:
+    spring.datasource.url : jdbc:postgresql://10.5.0.6:5432/VTubers
+    spring.datasource.username : admin
+    spring.datasource.password : admin
+    postgres.host : 10.5.0.6
+    postgres.port : 5432
+    postgres.user : admin
+    postgres.password : admin
+   networks:
+    betterjava_network:
+      ipv4_address: 10.5.0.5
   postgres_db:
     image: 'postgres:17'
     restart: always
     container_name: postgres_db
     ports:
       - "9001:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d VTubers"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_USER : admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: VTubers
       PGDATA: /var/lib/postgresql@17/data/VTubers
     volumes:
-    - ./data:/var/lib/mysql
-    - ./VTubers.sql:/docker-entrypoint-initdb.d/VTubers.sql
+      - ./data:/var/lib/mysql
+      - ./VTubers.sql:/docker-entrypoint-initdb.d/VTubers.sql
+    networks:
+      betterjava_network:
+        ipv4_address: 10.5.0.6
