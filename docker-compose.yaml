@@ -1,6 +1,8 @@
+version: "3.8"
 services:
   #betterjava:
-    #build: .
+    #build: . # /path/to/dockerfile or https://github.com/my-company/my-project.git
+    #image: betterjava-image #name of the image
     #ports:
      # - "8080:9000"
     #depends_on:
