@@ -39,6 +39,24 @@ const findUsersHandler = (request, response) => {
     }
 }
 
+//Router handler for POST
+const createUser = (request, response) => {
+    let body = '';
+    //Listen for data
+    request.on('data', (chunk) => {
+        let newUser = JSON.parse(chunk)
+        newUser.id = uuidv4()
+        body += JSON.stringify(newUser)
+    })
+    request.on('end', () => {
+        const newUser = JSON.parse(body);
+        users.push(newUser)
+        response.statusCode = 201;
+        response.write(JSON.stringify(newUser))
+        response.end()
+    })
+}
+
 const server = createServer(async (request, response) => {
     logger(request, response, () => {
         const numRegex = /^\d+$/;
@@ -47,6 +65,8 @@ const server = createServer(async (request, response) => {
                 getUsersHandler(request, response)
             } else if (numRegex.test(request.url.split('/')[3]) && request.method === 'GET') {
                 findUsersHandler(request, response)
+            } else if (request.url === '/api/users' && request.method === 'POST') {
+                createUser(request, response)
             } else {
                 notFoundURL(request, response)
             }
