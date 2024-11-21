@@ -16,7 +16,7 @@ const HomePage = () => {
       {/* <!-- Developers and Employers --> */}
       <HomeCards />
       {/* <!-- Browse Jobs --> */}
-      <JobListings />
+      <JobListings isHome={true}/>
 
       <ViewAllJobs />
     </>
