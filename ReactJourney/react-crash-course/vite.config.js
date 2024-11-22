@@ -7,7 +7,13 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/jobs' : 'http://localhost:5000'
+      '/jobs' : {
+        target: 'http://localhost:5000',
+        changeOrigin: true
+      }
     }
+  },
+  optimizeDeps: {
+    //exclude: ['js-big-decimal']
   }
 })

@@ -19,7 +19,7 @@ routes.get('/', (request, response) => {
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
       );
-    response.json(jobsListings.jobs)
+    response.json(jobsListings)
 })
 
 routes.get('/:id', (request, response) => {

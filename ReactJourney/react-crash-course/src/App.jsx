@@ -4,8 +4,11 @@ import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider} f
 import HomePage from './pages/HomePage'
 import JobsPage from './pages/JobsPage'
 import NotFoundPage from './pages/NotFoundPage'
-
+import JobPage from './pages/JobPage'
+ 
 import MainLayout from './layouts/MainLayout'
+
+import { loadJobData } from './service/JobService'
 
 function App() {
 
@@ -13,8 +16,9 @@ function App() {
     createRoutesFromElements(
       <Route path='/' element={<MainLayout/>}> 
         <Route index element={<HomePage/>}/>
-        <Route path='/jobs' element={<JobsPage/>}></Route>
-        <Route path='*' element={<NotFoundPage/>}></Route>
+        <Route path='/jobs' element={<JobsPage/>}/>
+        <Route path='/job/:id' element={<JobPage/>} loader={loadJobData}/>
+        <Route path='*' element={<NotFoundPage/>}/>
 
       </Route>
     )

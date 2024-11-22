@@ -5,7 +5,12 @@ import HomeCards from '../components/HomeCards'
 import JobListings from '../components/JobListings'
 import ViewAllJobs from '../components/ViewAllJobs'
 
+import { useLoaderData } from "react-router-dom";
+
 const HomePage = () => {
+
+  let loadJobs = useLoaderData()
+
   return (
     <>
       {/* <!-- Hero --> */}
@@ -16,7 +21,7 @@ const HomePage = () => {
       {/* <!-- Developers and Employers --> */}
       <HomeCards />
       {/* <!-- Browse Jobs --> */}
-      <JobListings isHome={true}/>
+      <JobListings isHome={true} loadedJobs={loadJobs}/>
 
       <ViewAllJobs />
     </>
