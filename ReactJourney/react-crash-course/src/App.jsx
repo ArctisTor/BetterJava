@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import JobsPage from './pages/JobsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import JobPage from './pages/JobPage'
+import AddJobPage from './pages/AddJobPage'
  
 import MainLayout from './layouts/MainLayout'
 
@@ -17,6 +18,7 @@ function App() {
       <Route path='/' element={<MainLayout/>}> 
         <Route index element={<HomePage/>}/>
         <Route path='/jobs' element={<JobsPage/>}/>
+        <Route path='/add-job' element={<AddJobPage/>}/>
         <Route path='/job/:id' element={<JobPage/>} loader={loadJobData}/>
         <Route path='*' element={<NotFoundPage/>}/>
 

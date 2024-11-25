@@ -40,4 +40,14 @@ routes.get('/:id', (request, response) => {
     response.status(status).json(job)
 })
 
+routes.post('/', (request, response) => {
+    let status = 200
+    let newJob = request.body
+    newJob.id =  "" + (jobsListings.jobs.length + 1)
+    jobsListings.jobs.push(newJob)
+
+
+    response.status(status).json(jobsListings)
+})
+
 export default routes;

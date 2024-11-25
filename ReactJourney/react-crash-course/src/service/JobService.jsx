@@ -32,6 +32,18 @@ export const fetchJob = async (id) => {
 
 }
 
+export const postJob = async (job) => {
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(job)
+    }
+
+    let response = await fetch('/jobs', requestOptions)
+    response = await response.json()
+}
+
 export const loadJobData = async ({params}) => {
     let job = fetchJob(params.id);
     return job;
