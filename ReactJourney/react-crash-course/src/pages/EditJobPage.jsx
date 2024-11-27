@@ -1,26 +1,31 @@
 import React from "react";
-import { useState } from "react";
-import { postJob } from "../service/JobService";
-import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-toastify";
-import { FaArrowLeft } from "react-icons/fa";
 
-const AddJobPage = () => {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("Full-Time");
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [salary, setSalary] = useState("Under $50K");
-  const [companyName, setCompanyName] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
+import { useLoaderData, useNavigate, Link } from "react-router-dom";
+import { updateJob } from "../service/JobService";
+import { useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
+import { toast } from "react-toastify";
+
+const EditJobPage = () => {
+  const job = useLoaderData();
+  const [title, setTitle] = useState(job.title);
+  const [type, setType] = useState(job.type);
+  const [location, setLocation] = useState(job.location);
+  const [description, setDescription] = useState(job.description);
+  const [salary, setSalary] = useState(job.salary);
+  const [companyName, setCompanyName] = useState(job.company.name);
+  const [companyDescription, setCompanyDescription] = useState(
+    job.company.description
+  );
+  const [contactEmail, setContactEmail] = useState(job.company.contactEmail);
+  const [contactPhone, setContactPhone] = useState(job.company.contactPhone);
   const navigate = useNavigate();
 
   const submitForm = async (event) => {
     event.preventDefault();
 
-    const newJob = {
+    const updatedJob = {
+      id: job.id,  
       title: title,
       type: type,
       location: location,
@@ -34,9 +39,9 @@ const AddJobPage = () => {
       },
     };
 
-    await postJob(newJob);
-    toast.success("Job added successfully.");
-    return navigate("/jobs");
+    await updateJob(updatedJob);
+    toast.success("Job updated successfully.");
+    return navigate(`/job/${job.id}`);
   };
 
   return (
@@ -44,10 +49,10 @@ const AddJobPage = () => {
       <section>
         <div className="container m-auto py-6 px-6">
           <Link
-            to={`/jobs/`}
+            to={`/job/${job.id}`}
             className="text-indigo-500 hover:text-indigo-600 flex items-center"
           >
-            <FaArrowLeft className="mr-2" /> Back to Jobs page
+            <FaArrowLeft className='mr-2'/> Back to {job.title} page
           </Link>
         </div>
       </section>
@@ -256,7 +261,7 @@ const AddJobPage = () => {
                   className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
                   type="submit"
                 >
-                  Add Job
+                  Update Job
                 </button>
               </div>
             </form>
@@ -267,4 +272,4 @@ const AddJobPage = () => {
   );
 };
 
-export default AddJobPage;
+export default EditJobPage;
