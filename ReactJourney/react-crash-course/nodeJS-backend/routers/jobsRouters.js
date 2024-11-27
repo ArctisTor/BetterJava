@@ -2,7 +2,6 @@ import express, { response } from 'express'
 import path from 'path'
 import fs from 'fs'
 import url from 'url'
-import { request } from 'http';
 
 const routes = express.Router();
 
@@ -47,6 +46,29 @@ routes.post('/', (request, response) => {
     jobsListings.jobs.push(newJob)
 
 
+    response.status(status).json(jobsListings)
+})
+
+routes.put('/', (request, response) => {
+    let status = 200;
+    let updateJob = request.body
+
+    let index = jobsListings.jobs.findIndex(job => job.id === updateJob.id)
+    if (index !== -1) {
+        jobsListings.jobs[index] = updateJob
+        response.status(status).json(jobsListings)
+    } else {
+        status = 404
+        response.status(status).json({'message' : 'Job was not found.', 'job' : updateJob})
+    }
+})
+
+routes.delete('/:id', (request, response) => {
+    let id = request.params.id
+    let status = 200
+
+    let newJobListings = jobsListings.jobs.filter(job => job.id != id);
+    jobsListings.jobs = newJobListings
     response.status(status).json(jobsListings)
 })
 

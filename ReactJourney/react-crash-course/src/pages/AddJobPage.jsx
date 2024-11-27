@@ -34,8 +34,7 @@ const AddJobPage = () => {
     }
 
     await postJob(newJob);
-    return navigate('/jobs')
-
+    return navigate('/jobs');
   }
 
   return (
