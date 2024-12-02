@@ -15,10 +15,9 @@ const UserGreetings = ({ isLoggedIn = false, userName = "Guest" }) => {
 };
 
 
-//reports a warning of could not fast refresh as default export is incompatible
-// UserGreetings.prototype = {
-//     isLoggedIn: protoType.bool,
-//     userName: protoType.string
-// }
+UserGreetings.protoType = {
+    isLoggedIn: protoType.bool,
+    userName: protoType.string
+}
 
 export default UserGreetings;

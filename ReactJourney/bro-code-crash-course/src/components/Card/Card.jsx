@@ -1,5 +1,6 @@
 import React from 'react'
 import reactsvg from '../../assets/react.svg'
+import './card.css'
 
 function Card() {
 
