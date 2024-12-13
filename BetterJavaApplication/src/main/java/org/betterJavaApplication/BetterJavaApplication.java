@@ -4,7 +4,7 @@ package org.betterJavaApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"org.betterJavaApplication", "org.controller"})
 public class BetterJavaApplication {
 
     public static void main(String[] args) {

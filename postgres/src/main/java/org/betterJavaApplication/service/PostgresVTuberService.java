@@ -1,8 +1,6 @@
 package org.betterJavaApplication.service;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.betterJavaApplication.connector.PostgresConnector;
@@ -20,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostgresVTuberService implements VTuberService {
@@ -66,6 +65,27 @@ public class PostgresVTuberService implements VTuberService {
     public List<Talent> getByOrganization(String orgName) {
         List<TalentEntity> list = this.talentRepository.findByOrganization(orgName);
         return talentEntityListMapping(list);
+    }
+
+    @Override
+    public Talent getShortestTalent() {
+        Optional<TalentEntity> shortestTalent = this.talentRepository.findShortestTalent();
+        if (shortestTalent.isPresent()) {
+            return talentEntityMapping(shortestTalent.get());
+        } else {
+            throw new RuntimeException("No talents found");
+        }
+
+    }
+
+    @Override
+    public Talent debutVTuberTalent(Talent newTalent) {
+        try {
+            TalentEntity debutTalent = this.talentRepository.save(new TalentEntity(newTalent));
+            return talentEntityMapping(debutTalent);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an error debuting the talent." , e);
+        }
     }
 
     private List<Talent> talentEntityListMapping(List<TalentEntity> te) {

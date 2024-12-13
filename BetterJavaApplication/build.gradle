@@ -11,14 +11,8 @@ repositories {
 }
 
 dependencies {
-
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.3.4'
+    implementation 'org.springframework.boot:spring-boot-starter:3.4.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
-    implementation 'org.json:json:20240303'
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

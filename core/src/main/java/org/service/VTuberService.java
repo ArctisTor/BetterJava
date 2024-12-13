@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface VTuberService {
 
-    public List<Talent> getAllVTubers();
-    public List<Talent> getByOrganization(String orgName);
+    List<Talent> getAllVTubers();
+    List<Talent> getByOrganization(String orgName);
+    Talent getShortestTalent();
+    Talent debutVTuberTalent(Talent newTalent);
 }
