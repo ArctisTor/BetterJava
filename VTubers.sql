@@ -29,7 +29,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.talent (
-    talent_id uuid DEFAULT gen_random_uuid(),
+    talent_id uuid DEFAULT gen_random_uuid() NOT NULL,
     talent_name character varying(200) NOT NULL,
     talent_debut date DEFAULT CURRENT_DATE,
     talent_birthday date NOT NULL,
@@ -59,6 +59,9 @@ e246b6e8-41a7-4084-bb8c-8e4b059c2eb9	Hoshimachi Suisei	2018-03-18	2018-03-22	Hol
 -- TOC entry 2043 (class 826 OID 16422)
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
+
+ALTER TABLE ONLY public.talent
+    ADD CONSTRAINT talent_pkey PRIMARY KEY (talent_id);
 
 -- ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO admin;
 

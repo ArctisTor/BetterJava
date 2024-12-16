@@ -11,3 +11,6 @@ sudo docker ps
 
 Jump into the container
 docker exec -it <name-of-container> sh
+
+to run the yaml file
+docker-compose up --build

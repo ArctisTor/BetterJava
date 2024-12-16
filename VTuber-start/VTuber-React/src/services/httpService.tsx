@@ -8,7 +8,6 @@ export const getAllVTubers = async(): Promise<VTuber[]> => {
         response = await response.json();
         //@ts-ignore
         vtubers = response.Vtubers as VTuber[]
-        console.log(vtubers)
     } catch (error) {
         console.error('Error fetching VTubers:', error);
     } 

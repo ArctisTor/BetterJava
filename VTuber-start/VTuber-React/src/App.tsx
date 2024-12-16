@@ -1,7 +1,13 @@
-import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+} from "react-router-dom";
 
-import './App.css';
-import VTuberList from './pages/VTuberList';
+import "./App.css";
+import VTuberList from "./pages/VTuberList";
+import NavBar from "./component/NavBar";
 
 function App() {
   const router = createBrowserRouter(
@@ -12,7 +18,12 @@ function App() {
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <NavBar/>
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

@@ -41,7 +41,7 @@ services:
       PGDATA: /var/lib/postgresql@17/data/VTubers
     volumes:
       - ./data:/var/lib/mysql
-      - ./VTubers.sql:/docker-entrypoint-initdb.d/VTubers.sql
+      - ./VTubers_DB_v1.sql:/docker-entrypoint-initdb.d/VTubers.sql
     networks:
       betterjava_network:
         ipv4_address: 10.5.0.6
