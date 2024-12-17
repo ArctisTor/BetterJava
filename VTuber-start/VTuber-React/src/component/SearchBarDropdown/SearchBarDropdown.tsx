@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
 import "./SearchBarDropdown.css";
+import { SearchBarDropdownModel } from "../../models/SearchBarDropdownModel";
 
-// TypeScript interface for the props
-interface SearchBarDropdownProps {
-  options: string[]; // List of options for the dropdown
-  onSelect: (selected: string) => void;
-  selectedCategory: string; // Callback to handle selection, onSelect is a function that takes a string
-}
-
-const SearchBarDropdown: React.FC<SearchBarDropdownProps> = ({
+const SearchBarDropdown: React.FC<SearchBarDropdownModel> = ({
   options,
   onSelect,
   selectedCategory,

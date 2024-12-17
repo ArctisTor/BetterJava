@@ -3,12 +3,12 @@ import './SearchBar.css'
 import SearchBarDropdown from "../SearchBarDropdown/SearchBarDropdown";
 import { FilterOption } from "../../models/FilterOption";
 
-interface DropdownProps {
+interface Dropdown {
   dropdownOption: string[],
   onSearch: (filterOption: FilterOption) => void
 }
 
-const SearchBar: React.FC<DropdownProps>= ({dropdownOption, onSearch}) => {
+const SearchBar: React.FC<Dropdown>= ({dropdownOption, onSearch}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("Select an option");
 

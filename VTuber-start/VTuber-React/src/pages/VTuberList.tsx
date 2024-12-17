@@ -1,49 +1,41 @@
 import { useState, useEffect } from "react";
-import { getAllVTubers } from "../services/httpService";
 import { VTuber } from "../models/VTuber";
 import VTuberEntity from "./VTuberEntity";
 import SearchBar from "../component/SearchBar/SearchBar";
 import SearchFilterOption from "../component/SearchFilterOption/SearchFilterOption";
-import { SearchFilterOptions } from "../models/SearchFilterOptions";
 import { FilterOption } from "../models/FilterOption";
+import { filterService } from "../services/filterService";
+import HttpService from "../services/httpService";
 
+const httpService = new HttpService();
 
 const VTuberList = () => {
-  const [vtubers, setVTubers] = useState<VTuber[]>([]);
+  const [vtubers, setVtubers] = useState<VTuber[]>([]);
   const [dropdownOptions, setDropdownOptions] = useState<string[]>([]);
-  const [searchFilterOption, setSearchFilterOptions] = useState<SearchFilterOptions>({filters: []})
-
-  const loadVTubers = async () => {
-    try {
-      let response = await getAllVTubers();
-      if (Array.isArray(response)) {
-        setDropdownOptions(Object.keys(response[0]))
-        setVTubers(response);
-      }
-    } catch (error) {
-      console.log("Error fetching data", error);
-    }
-  };
 
   const handleFilter = (filterOption: FilterOption) => {
-    console.log(`Your current filter is: ${filterOption.query} and ${filterOption.category}`)
-
-    setSearchFilterOptions((prevState) => {
-      return {
-        filters: [...prevState.filters, filterOption], // Add new filter to the existing filters array
-      };
-    });
-
-  }
+    filterService.addFilter(filterOption);
+  };
 
   useEffect(() => {
-    loadVTubers();
+    const handleVtuberUpdate = (newVtubers: VTuber[]) => {
+      setDropdownOptions(Object.keys(newVtubers[0]))
+      setVtubers(newVtubers); // Update the state with the latest vtubers
+    };
+
+    httpService.subscribeOnVTubers(handleVtuberUpdate)
+
+
+    httpService.getAllVTubers();
+
+    // Cleanup on unmount
+    return () => httpService.unsubscribeOnVTubers(handleVtuberUpdate);
   }, []);
 
   return (
     <>
-      <SearchBar dropdownOption={dropdownOptions} onSearch={handleFilter}/>
-      <SearchFilterOption filters={searchFilterOption}/>
+      <SearchBar dropdownOption={dropdownOptions} onSearch={handleFilter} />
+      <SearchFilterOption />
       <section className="bg-blue-50 px-4 py-10">
         <div className="container-xl lg:container m-auto">
           <h2 className="text-3xl font-bold text-indigo-500 mb-6 text-center"></h2>

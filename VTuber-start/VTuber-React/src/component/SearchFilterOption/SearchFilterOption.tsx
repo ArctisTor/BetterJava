@@ -1,30 +1,39 @@
-import { SearchFilterOptions } from "../../models/SearchFilterOptions";
+import { FilterOption } from "../../models/FilterOption";
 import { useState, useEffect } from "react";
+import { filterService } from "../../services/filterService";
+import "./SearchFilterOption.css";
 
-const SearchFilterOption: React.FC<{filters: SearchFilterOptions}> = ({ filters }) => {
-
-  const [currentFilters, setCurrentFilter] = useState<SearchFilterOptions>({filters: []})
-
+const SearchFilterOption = () => {
+  const [filters, setFilters] = useState<FilterOption[]>([]);
 
   // Sync the internal selectedOption state with selectedCategory prop
   useEffect(() => {
-    if (filters && filters.filters) { 
-      setCurrentFilter(filters);
-    }
-  }, [filters]);
+    // Update function to sync state with the service
+    const updateFilters = (newFilters: FilterOption[]) => {
+      setFilters(newFilters); // Get latest filters from the service
+    };
+
+    filterService.subscribe(updateFilters);
+
+    // Cleanup on unmount
+    return () => filterService.unsubscribe(updateFilters);
+  }, []);
 
   return (
     <>
       <div>
-        {currentFilters.filters && currentFilters.filters.length > 0 ? (
-          currentFilters.filters.map((filter, index) => (
-            <div key={index}>
-              <p>Field: {filter.query}</p>
-              <p>Option: {filter.category}</p>
-            </div>
-          ))
+        <h3>Current Filters:</h3>
+        {filters.length > 0 ? (
+          <div className="filter-container">
+            {filters.map((filter, index) => (
+              <div key={index} className="filter-box">
+                <p className="field">{filter.query}, </p>
+                <p className="field">{filter.category}</p>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p>No filters available.</p>
+          <p>No filters applied.</p>
         )}
       </div>
     </>
