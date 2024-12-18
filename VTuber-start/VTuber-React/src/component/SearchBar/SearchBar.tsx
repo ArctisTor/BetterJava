@@ -2,13 +2,13 @@ import { useState } from "react";
 import './SearchBar.css'
 import SearchBarDropdown from "../SearchBarDropdown/SearchBarDropdown";
 import { FilterOption } from "../../models/FilterOption";
+import { filterService } from "../../services/filterService";
 
 interface Dropdown {
-  dropdownOption: string[],
-  onSearch: (filterOption: FilterOption) => void
+  dropdownOption: string[]
 }
 
-const SearchBar: React.FC<Dropdown>= ({dropdownOption, onSearch}) => {
+const SearchBar: React.FC<Dropdown>= ({dropdownOption}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("Select an option");
 
@@ -20,7 +20,7 @@ const SearchBar: React.FC<Dropdown>= ({dropdownOption, onSearch}) => {
   const handleSearch = () => {
     console.log(`Search query: ${searchQuery}`);
     const newFilterOption = new FilterOption(searchQuery, category);
-    onSearch(newFilterOption)
+    filterService.addFilter(newFilterOption)
     setSearchQuery('')
     setCategory('Select an option')
   };

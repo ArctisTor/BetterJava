@@ -35,3 +35,19 @@
   font-weight: normal;
   color: #444;
 }
+
+/* Remove button */
+.remove-button {
+  background-color: #ef4444; /* Red background for the button */
+  color: white; /* White text */
+  padding: 0px 5px; /* Internal padding */
+  font-size: 15px; /* Small font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Smooth hover effect */
+  margin-left: 5px;
+}
+
+/* Button hover effect */
+.remove-button:hover {
+  background-color: #dc2626; /* Darker red on hover */
+}

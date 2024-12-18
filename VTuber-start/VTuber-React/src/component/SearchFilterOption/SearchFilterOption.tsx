@@ -6,6 +6,10 @@ import "./SearchFilterOption.css";
 const SearchFilterOption = () => {
   const [filters, setFilters] = useState<FilterOption[]>([]);
 
+  const handleRemoveFilter = (index: number) => {
+    filterService.removeFilter(index);
+  };
+
   // Sync the internal selectedOption state with selectedCategory prop
   useEffect(() => {
     // Update function to sync state with the service
@@ -29,6 +33,9 @@ const SearchFilterOption = () => {
               <div key={index} className="filter-box">
                 <p className="field">{filter.query}, </p>
                 <p className="field">{filter.category}</p>
+                <button className="remove-button" onClick={() => handleRemoveFilter(index)}>
+                  X
+                </button>
               </div>
             ))}
           </div>
