@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-08 14:07:39
+-- Started on 2024-12-13 13:05:15
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,12 +19,31 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- TOC entry 4 (class 2615 OID 2200)
+-- Name: public; Type: SCHEMA; Schema: -; Owner: pg_database_owner
+--
+
+-- CREATE SCHEMA public;
+
+
+-- ALTER SCHEMA public OWNER TO pg_database_owner;
+
+--
+-- TOC entry 4798 (class 0 OID 0)
+-- Dependencies: 4
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
+--
+
+-- COMMENT ON SCHEMA public IS 'standard public schema';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- TOC entry 217 (class 1259 OID 16408)
+-- TOC entry 217 (class 1259 OID 16389)
 -- Name: talent; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -40,33 +59,31 @@ CREATE TABLE public.talent (
 );
 
 
--- ALTER TABLE public.talent OWNER TO admin;
+-- ALTER TABLE public.talent OWNER TO postgres;
 
 --
--- TOC entry 4791 (class 0 OID 16408)
+-- TOC entry 4792 (class 0 OID 16389)
 -- Dependencies: 217
 -- Data for Name: talent; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.talent (talent_id, talent_name, talent_debut, talent_birthday, talent_organization, talent_unit, talent_height, talent_fan_name) FROM stdin;
-dffa7cc7-230a-42bf-b880-02be59133bfe	Shirakami Fubuki	2018-06-01	2018-10-05	Hololive	Hololive 1st Gen/Gamers	155	Friends
-4e5fade6-8b38-4551-8de4-bf60e79b4482	Nakia Sata	2021-10-09	2021-01-13	Indie	Indie	159.5	Satalis
-e246b6e8-41a7-4084-bb8c-8e4b059c2eb9	Hoshimachi Suisei	2018-03-18	2018-03-22	Hololive	Hololive Generation 0	160	Hoshiyomi (Stargazers)
+c62d8056-165e-45b8-b5de-6a26256d8024	Shirakami Fubuki	2018-06-01	2018-10-05	Hololive	Hololive 1st Gen/Gamers	155	Friends
+da54c15a-c61e-4f80-bab2-0aed30a75bf6	Nakia Sata	2021-10-09	2021-01-13	Indie	Indie	159.5	Satalis
+ff7a52bd-2fc7-4d16-bf56-bc260cb1e682	Hoshimachi Suisei	2018-03-18	2018-03-22	Hololive	Hololive Generation 0	160	Hoshiyomi (Stargazers)
 \.
 
 
 --
--- TOC entry 2043 (class 826 OID 16422)
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
+-- TOC entry 4646 (class 2606 OID 24579)
+-- Name: talent talent_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.talent
     ADD CONSTRAINT talent_pkey PRIMARY KEY (talent_id);
 
--- ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO admin;
 
-
--- Completed on 2024-11-08 14:07:39
+-- Completed on 2024-12-13 13:05:15
 
 --
 -- PostgreSQL database dump complete
