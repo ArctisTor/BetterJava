@@ -1,40 +1,41 @@
 import { useState } from "react";
-import './SearchBar.css'
+import "./SearchBar.css";
 import SearchBarDropdown from "../SearchBarDropdown/SearchBarDropdown";
 import { FilterOption } from "../../models/FilterOption";
 import { filterService } from "../../services/filterService";
 
 interface Dropdown {
-  dropdownOption: string[]
+  dropdownOption: string[];
 }
 
-const SearchBar: React.FC<Dropdown>= ({dropdownOption}) => {
+const SearchBar: React.FC<Dropdown> = ({ dropdownOption }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("Select an option");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     //event.preventDefault(); //Not needed for text inputs
     setSearchQuery(event.target.value);
-  }
+  };
 
   const handleSearch = () => {
     console.log(`Search query: ${searchQuery}`);
     const newFilterOption = new FilterOption(searchQuery, category);
-    filterService.addFilter(newFilterOption)
-    setSearchQuery('')
-    setCategory('Select an option')
+    filterService.addFilter(newFilterOption);
+    setSearchQuery("");
+    setCategory("Select an option");
   };
 
   const handleSelect = (selected: string) => {
-    setCategory(selected)
-  }
+    setCategory(selected);
+  };
 
   const isValidSearch = () => {
     return (
-      category.trim().length === 0 || category === 'Select an option' || searchQuery.trim().length === 0
+      category.trim().length === 0 ||
+      category === "Select an option" ||
+      searchQuery.trim().length === 0
     );
   };
-  
 
   return (
     <>
@@ -46,8 +47,16 @@ const SearchBar: React.FC<Dropdown>= ({dropdownOption}) => {
           onChange={handleInputChange}
           className="vtuber-search-bar-input"
         />
-        <SearchBarDropdown options={dropdownOption} onSelect={handleSelect} selectedCategory={category}/>
-        <button onClick={handleSearch} className="search-button" disabled={isValidSearch()}>
+        <SearchBarDropdown
+          options={dropdownOption}
+          onSelect={handleSelect}
+          selectedCategory={category}
+        />
+        <button
+          onClick={handleSearch}
+          className="search-button"
+          disabled={isValidSearch()}
+        >
           Search
         </button>
       </div>
