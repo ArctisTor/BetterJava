@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface TalentRepository extends JpaRepository<TalentEntity, String> {
 
-    List<TalentEntity> findByOrganization(String orgName);
+
+    List<TalentEntity> findByOrganization(String orgId);
+
 
     @Query(value = "SELECT * from talent WHERE talent_height = (SELECT MIN(talent_height) FROM talent)", nativeQuery = true)
     Optional<TalentEntity> findShortestTalent();
