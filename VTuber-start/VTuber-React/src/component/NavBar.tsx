@@ -1,4 +1,12 @@
-const NavBar = () => {
+interface NavBarTitle {
+  title?: string;
+}
+
+const NavBar: React.FC<NavBarTitle> = ({title}) => {
+
+  const defaultTitle = "VTuber Database";
+  const displayTitle = title || defaultTitle;
+
   return (
     <>
       <nav className="bg-indigo-700 border-b border-indigo-500">
@@ -6,7 +14,7 @@ const NavBar = () => {
           <div className="flex h-20 items-center justify-between">
             <div className="flex flex-1 justify-center">
               <span className="text-white text-4xl font-extrabold tracking-wide">
-                VTuber Database
+                {displayTitle}
               </span>
             </div>
           </div>

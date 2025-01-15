@@ -26,21 +26,26 @@ const SearchFilterOption = () => {
   return (
     <>
       <div>
-        <h3>Current Filters:</h3>
         {filters.length > 0 ? (
-          <div className="filter-container">
-            {filters.map((filter, index) => (
-              <div key={index} className="filter-box">
-                <p className="field">{filter.query}, </p>
-                <p className="field">{filter.category}</p>
-                <button className="remove-button" onClick={() => handleRemoveFilter(index)}>
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
+          <>
+            <h3>Current Filters:</h3>
+            <div className="filter-container">
+              {filters.map((filter, index) => (
+                <div key={index} className="filter-box">
+                  <p className="field">{filter.query}, </p>
+                  <p className="field">{filter.category}</p>
+                  <button
+                    className="remove-button"
+                    onClick={() => handleRemoveFilter(index)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <p>No filters applied.</p>
+          <></> // Show this message when no filters exist
         )}
       </div>
     </>
