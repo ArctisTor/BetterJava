@@ -9,6 +9,9 @@
     "port" : "8080",
     "vtuberController" : {
       "getAll" : "/Vtuber"
+    },
+    "orgController" : {
+      "getAll" : "/Organization"
     }
   }
 }

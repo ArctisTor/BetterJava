@@ -4,6 +4,7 @@ import url from 'url'
 import fs from "fs";
 import cors from 'cors';
 import vtuberRouter from './routers/vtuber-router.js'
+import orgRouter from './routers/org-router.js'
 
 // Get current path because of type module
 const __filename = url.fileURLToPath(import.meta.url)
@@ -25,6 +26,7 @@ const app = express();
 app.use(express.json())
 app.use(cors());
 app.use('/vtuber', vtuberRouter(config))
+app.use('/org', orgRouter(config))
 
 app.listen(PORT, () => {
     console.log(`Server is running on PORT: ${PORT}`)

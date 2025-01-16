@@ -87,7 +87,7 @@ CREATE TABLE public.talent (
 --
 
 COPY public.organization (id, name, owner, website, founded, industry, brands, founder) FROM stdin;
-8fc96e59-ff45-4f17-851f-9f0b1c86424b	Hololive Production	Cover Corporation	https://hololivepro.com/en/	2016-06-13	Virtual YouTuber agency	{"Hololive JP","Hololive ID","Hololive EN","Holostars JP","Hololive EN"}	Motoaki Tanigo
+8fc96e59-ff45-4f17-851f-9f0b1c86424b	Hololive Production	Cover Corporation	https://hololivepro.com/en/	2016-06-13	Virtual YouTuber agency	{"Hololive JP","Hololive ID","Hololive EN","Holostars JP","Holostars EN"}	Motoaki Tanigo
 fed7d4bf-2264-4aa5-a43a-9f2e9949e4f8	Independent VTuber	Independent	No single website	\N	Virtual YouTuber agency	{}	Usually the talent themselves
 \.
 
