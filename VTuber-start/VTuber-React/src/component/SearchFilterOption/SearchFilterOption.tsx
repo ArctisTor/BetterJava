@@ -3,12 +3,21 @@ import { useState, useEffect } from "react";
 import { filterService } from "../../services/filterService";
 import "./SearchFilterOption.css";
 
+import { useDispatch } from "react-redux";
+import { decrement } from "../../slices/filterSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../../services/store";
+
 const SearchFilterOption = () => {
   const [filters, setFilters] = useState<FilterOption[]>([]);
 
   const handleRemoveFilter = (index: number) => {
     filterService.removeFilter(index);
+    dispatch(decrement(index));
   };
+
+  let dispatch = useDispatch();
+  let currentFilters = useSelector((state: RootState) => state.filters.filters);
 
   // Sync the internal selectedOption state with selectedCategory prop
   useEffect(() => {
@@ -30,7 +39,7 @@ const SearchFilterOption = () => {
           <>
             <h3>Current Filters:</h3>
             <div className="filter-container">
-              {filters.map((filter, index) => (
+              {currentFilters.map((filter, index) => (
                 <div key={index} className="filter-box">
                   <p className="field">{filter.query}, </p>
                   <p className="field">{filter.category}</p>

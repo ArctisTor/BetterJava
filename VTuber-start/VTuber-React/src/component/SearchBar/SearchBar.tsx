@@ -4,6 +4,9 @@ import SearchBarDropdown from "../SearchBarDropdown/SearchBarDropdown";
 import { FilterOption } from "../../models/FilterOption";
 import { filterService } from "../../services/filterService";
 
+import { useDispatch } from "react-redux";
+import { increment } from "../../slices/filterSlice";
+
 interface Dropdown {
   dropdownOption: string[];
 }
@@ -12,15 +15,18 @@ const SearchBar: React.FC<Dropdown> = ({ dropdownOption }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("Select an option");
 
+  const dispatch = useDispatch();
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     //event.preventDefault(); //Not needed for text inputs
     setSearchQuery(event.target.value);
   };
 
   const handleSearch = () => {
-    console.log(`Search query: ${searchQuery}`);
     const newFilterOption = new FilterOption(searchQuery, category);
     filterService.addFilter(newFilterOption);
+    const plainObject = newFilterOption.toPlainObject();
+    dispatch(increment(plainObject));
     setSearchQuery("");
     setCategory("Select an option");
   };
