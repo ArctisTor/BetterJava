@@ -1,3 +1,6 @@
+#basic info
+version.number=1.0.0
+
 spring.mvc.converters.preferred-json-mapper=gson
 
 server.port=9000
