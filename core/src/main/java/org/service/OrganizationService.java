@@ -9,4 +9,5 @@ public interface OrganizationService {
     List<Organization> getAllOrganizations();
     Organization getOrganizationByName(String name);
     Organization getOrganizationById(String id);
+    Organization addOrganization(Organization organization);
 }

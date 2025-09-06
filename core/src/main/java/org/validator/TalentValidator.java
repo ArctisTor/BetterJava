@@ -4,9 +4,10 @@ import org.object.Organization;
 import org.object.Talent;
 import org.service.OrganizationService;
 
-public abstract class TalentValidator {
+public class TalentValidator {
 
     protected final OrganizationService organizationService;
+    protected final OrganizationValidator organizationValidator = new OrganizationValidator();
 
     public TalentValidator(OrganizationService organizationService) {
         if (organizationService == null) {
@@ -33,10 +34,10 @@ public abstract class TalentValidator {
         //The organization must exist in the database first
         if (talentOrg == null) {
             return false;
-        } else if (!OrganizationValidator.isOrganizationValid(talentOrg)) {
+        } else if (!organizationValidator.isOrganizationValid(talentOrg)) {
             //must be a valid organization
             return false;
-        } else if (OrganizationValidator.isValidCorporationOrganization(talentOrg)) {
+        } else if (organizationValidator.isValidCorporationOrganization(talentOrg)) {
             //If the talent is a corporation talent, then they have to have the required fields
             return isValidCorporationTalent(talent);
         }

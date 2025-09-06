@@ -3,9 +3,9 @@ package org.validator;
 import org.constants.OrganizationConstants;
 import org.object.Organization;
 
-public abstract class OrganizationValidator {
+public class OrganizationValidator {
 
-    public static boolean isOrganizationValid(Organization org) {
+    public boolean isOrganizationValid(Organization org) {
         if (org.getId() == null || org.getName() == null ||
                 org.getId().isBlank() || org.getName().isBlank()) {
             return false;
@@ -16,7 +16,7 @@ public abstract class OrganizationValidator {
         }
     }
 
-    public static boolean isValidCorporationOrganization(Organization org) {
+    public boolean isValidCorporationOrganization(Organization org) {
         //must have an owner, a website, a founded date, and a founder
         return org.getOwner() != null && !org.getOwner().isEmpty()
                 && org.getWebsite() != null && !org.getWebsite().isEmpty()
