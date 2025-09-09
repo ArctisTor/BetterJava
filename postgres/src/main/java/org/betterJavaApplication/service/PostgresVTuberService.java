@@ -19,6 +19,7 @@ import org.validator.TalentValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PostgresVTuberService implements VTuberService {
@@ -106,6 +107,9 @@ public class PostgresVTuberService implements VTuberService {
         }
 
         try {
+            if (newTalent.getId().isBlank()) {
+                newTalent.setId(String.valueOf(UUID.randomUUID()));
+            }
             TalentEntity debutTalent = this.talentRepository.save(new TalentEntity(newTalent));
             return EntityToObjectMapper.toTalentModel(debutTalent);
         } catch (Exception e) {
