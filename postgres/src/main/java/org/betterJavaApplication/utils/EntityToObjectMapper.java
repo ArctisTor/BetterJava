@@ -16,8 +16,8 @@ public class EntityToObjectMapper {
     // Converts a TalentEntity object to a Talent object
     public static Talent toTalentModel(TalentEntity talentEntity) {
         Talent talent = new Talent();
-        talent.setId(talentEntity.getTalent_id());
-        talent.setName(talentEntity.getTalent_name());
+        talent.setId(talentEntity.getId());
+        talent.setName(talentEntity.getName());
         talent.setDebut(talentEntity.getTalent_debut());
         talent.setBirthday(talentEntity.getTalent_birthday());
         talent.setOrganization(talentEntity.getTalent_organization());

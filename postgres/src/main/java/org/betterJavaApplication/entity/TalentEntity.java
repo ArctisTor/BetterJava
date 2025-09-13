@@ -2,6 +2,7 @@ package org.betterJavaApplication.entity;
 
 import com.google.gson.JsonObject;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import org.object.Talent;
 
 import java.time.LocalDate;
@@ -11,9 +12,12 @@ import java.time.LocalDate;
 public class TalentEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String talent_id;
-    private String talent_name;
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "talent_id", updatable = false, nullable = false)
+    private String id;
+    @Column(name="talent_name")
+    private String name;
     private String talent_debut;
     private String talent_birthday;
     @Column(name="talent_organization")
@@ -25,7 +29,7 @@ public class TalentEntity {
     protected TalentEntity() {}
 
     public TalentEntity(String name, String debut, String birthday, String organization, String unit, Double height, String fanName) {
-        this.talent_name= name;
+        this.name= name;
         this.talent_debut = debut;
         this.talent_birthday = birthday;
         this.organization = organization;
@@ -35,8 +39,8 @@ public class TalentEntity {
     }
 
     public TalentEntity(Talent talent) {
-        this.talent_id = talent.getId();
-        this.talent_name = talent.getName();
+        this.id = talent.getId();
+        this.name = talent.getName();
         this.talent_debut = talent.getDebut();
         this.talent_birthday = talent.getBirthday();
         this.organization = talent.getOrganization();
@@ -47,29 +51,30 @@ public class TalentEntity {
 
     // Constructor to populate fields from JsonObject
     public TalentEntity(JsonObject jsonObject) {
-        this.talent_name = jsonObject.get("talent_name").getAsString();
-        this.talent_debut = String.valueOf(LocalDate.parse(jsonObject.get("talent_debut").getAsString()));
-        this.talent_birthday = String.valueOf(LocalDate.parse(jsonObject.get("talent_birthday").getAsString()));
-        this.organization = jsonObject.get("talent_organization").getAsString();
-        this.talent_unit = jsonObject.get("talent_unit").getAsString();
-        this.talent_height = jsonObject.get("talent_height").getAsDouble();
-        this.talent_fan_name = jsonObject.get("talent_fan_name").getAsString();
+        this.id = jsonObject.get("id").getAsString();
+        this.name = jsonObject.get("name").getAsString();
+        this.talent_debut = String.valueOf(LocalDate.parse(jsonObject.get("debut").getAsString()));
+        this.talent_birthday = String.valueOf(LocalDate.parse(jsonObject.get("birthday").getAsString()));
+        this.organization = jsonObject.get("organization").getAsString();
+        this.talent_unit = jsonObject.get("unit").getAsString();
+        this.talent_height = jsonObject.get("height").getAsDouble();
+        this.talent_fan_name = jsonObject.get("fans").getAsString();
     }
 
-    public String getTalent_id() {
-        return talent_id;
+    public String getId() {
+        return id;
     }
 
-    public void setTalent_id(String talent_id) {
-        this.talent_id = talent_id;
+    public void setId(String talent_id) {
+        this.id = talent_id;
     }
 
-    public String getTalent_name() {
-        return talent_name;
+    public String getName() {
+        return name;
     }
 
-    public void setTalent_name(String talent_name) {
-        this.talent_name = talent_name;
+    public void setName(String talent_name) {
+        this.name = talent_name;
     }
 
     public String getTalent_debut() {
@@ -123,14 +128,14 @@ public class TalentEntity {
     // Method to convert TalentEntity to JsonObject
     public JsonObject toJsonObject() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("talent_id", this.talent_id);
-        jsonObject.addProperty("talent_name", this.talent_name);
-        jsonObject.addProperty("talent_debut", this.talent_debut);
-        jsonObject.addProperty("talent_birthday", this.talent_birthday);
-        jsonObject.addProperty("talent_organization", this.organization);
-        jsonObject.addProperty("talent_unit", this.talent_unit);
-        jsonObject.addProperty("talent_height", this.talent_height);
-        jsonObject.addProperty("talent_fan_name", this.talent_fan_name);
+        jsonObject.addProperty("id", this.id);
+        jsonObject.addProperty("name", this.name);
+        jsonObject.addProperty("debut", this.talent_debut);
+        jsonObject.addProperty("birthday", this.talent_birthday);
+        jsonObject.addProperty("organization", this.organization);
+        jsonObject.addProperty("unit", this.talent_unit);
+        jsonObject.addProperty("height", this.talent_height);
+        jsonObject.addProperty("fans", this.talent_fan_name);
         return jsonObject;
     }
 }

@@ -17,10 +17,9 @@ import java.util.List;
 @RequestMapping("/Vtuber")
 public class VTuberController {
 
+    private final Gson gson = new Gson();
     @Autowired
     private VTuberService vTuberService;
-    private final Gson gson = new Gson();
-
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonObject> getAllVTubers() {
@@ -28,9 +27,44 @@ public class VTuberController {
         JsonArray vtuberArray = new JsonArray();
         List<Talent> vtuberList = this.vTuberService.getAllVTubers();
         vtuberList.forEach(vtuber -> {
-           vtuberArray.add(gson.toJsonTree(vtuber));
+            vtuberArray.add(gson.toJsonTree(vtuber));
         });
         response.add("Vtubers", vtuberArray);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JsonObject> getVTuberTalentById(@RequestParam("id") String id) {
+        JsonObject response = new JsonObject();
+        if (id == null || id.isBlank()) {
+            response.addProperty("error", "ID is empty");
+            return ResponseEntity.badRequest().body(response);
+        }
+        Talent foundTalent = vTuberService.getVTuberTalentById(id);
+        if (foundTalent != null) {
+            response = foundTalent.toJsonObject();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.addProperty("error", String.format("Could not find Talent with id %s", id));
+            return ResponseEntity.badRequest().body(response);
+        }
+
+    }
+
+    @GetMapping(value = "/name", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JsonObject> getVTuberTalentByName(@RequestParam("name") String name) {
+        JsonObject response = new JsonObject();
+        if (name == null || name.isBlank()) {
+            response.addProperty("error", "Name is empty");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        JsonArray vTuberArray = new JsonArray();
+        List<Talent> foundTalents = vTuberService.getVTuberTalentByName(name);
+        foundTalents.forEach(talent -> {
+            vTuberArray.add(gson.toJsonTree(talent));
+        });
+        response.add("VTubers", vTuberArray);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -42,22 +76,49 @@ public class VTuberController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(value="/{orgName}")
-    public ResponseEntity<JsonObject> getByOrganization(@PathVariable("orgName") String orgName) {
+    @GetMapping(value = "/org", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JsonObject> getByOrganization(@RequestParam("org") String orgName) {
         JsonObject response = new JsonObject();
-        JsonArray vtuberArray = new JsonArray();
+        JsonArray vTuberArray = new JsonArray();
         List<Talent> talentEntityList = this.vTuberService.getByOrganization(orgName);
-        talentEntityList.forEach(vtuber -> {
-            vtuberArray.add(gson.toJsonTree(vtuber));
+        talentEntityList.forEach(vTuber -> {
+            vTuberArray.add(gson.toJsonTree(vTuber));
         });
-        response.add("VTubers", vtuberArray);
+        response.add("VTubers", vTuberArray);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/debut")
     public ResponseEntity<JsonObject> debutTalent(@RequestBody Talent debutTalent) {
-        Talent debuted = this.vTuberService.debutVTuberTalent(debutTalent);
-        JsonObject response = debuted.toJsonObject();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            Talent debuted = this.vTuberService.debutVTuberTalent(debutTalent);
+            JsonObject response = debuted.toJsonObject();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            JsonObject error = new JsonObject();
+            error.addProperty("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (RuntimeException e) {
+            JsonObject error = new JsonObject();
+            error.addProperty("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PutMapping
+    public ResponseEntity<JsonObject> updateTalent(@RequestBody Talent updateTalent) {
+        try {
+            Talent successfullyUpdated = this.vTuberService.updateVTuberTalent(updateTalent);
+            JsonObject response = successfullyUpdated.toJsonObject();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            JsonObject error = new JsonObject();
+            error.addProperty("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (RuntimeException e) {
+            JsonObject error = new JsonObject();
+            error.addProperty("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 }

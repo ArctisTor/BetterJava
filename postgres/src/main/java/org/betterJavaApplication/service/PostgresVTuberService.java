@@ -84,6 +84,22 @@ public class PostgresVTuberService implements VTuberService {
     }
 
     @Override
+    public Talent getVTuberTalentById(String id) {
+        Optional<TalentEntity> foundTalent = this.talentRepository.findById(id);
+        return foundTalent.map(EntityToObjectMapper::toTalentModel).orElse(null);
+    }
+
+    @Override
+    public List<Talent> getVTuberTalentByName(String name) {
+        List<TalentEntity> foundTalents = this.talentRepository.findByName(name);
+        List<Talent> talentList = new ArrayList<>();
+        foundTalents.forEach(talentEntity -> {
+            talentList.add(EntityToObjectMapper.toTalentModel(talentEntity));
+        });
+        return talentList;
+    }
+
+    @Override
     public Talent getShortestTalent() {
         Optional<TalentEntity> shortestTalent = this.talentRepository.findShortestTalent();
         if (shortestTalent.isPresent()) {
@@ -91,7 +107,7 @@ public class PostgresVTuberService implements VTuberService {
             if (organizationValidator.isOrganizationValid(org)) {
                 shortestTalent.get().setTalent_organization(org.getName());
             } else {
-                throw new RuntimeException(String.format("No Organizations found for: %s", shortestTalent.get().getTalent_name()));
+                throw new RuntimeException(String.format("No Organizations found for: %s", shortestTalent.get().getName()));
             }
             return EntityToObjectMapper.toTalentModel(shortestTalent.get());
         } else {
@@ -115,6 +131,24 @@ public class PostgresVTuberService implements VTuberService {
         } catch (Exception e) {
             throw new RuntimeException("There was an error debuting the talent.", e);
         }
+    }
+
+    @Override
+    public Talent updateVTuberTalent(Talent updateTalent) {
+        if (!this.talentValidator.isTalentValid(updateTalent)
+                || updateTalent.getId() == null || updateTalent.getId().isBlank()) {
+            throw new IllegalArgumentException("Talent was not a valid format.");
+        }
+
+        //check to see if it exists
+        Talent checkTalent = this.getVTuberTalentById(updateTalent.getId());
+        if (checkTalent == null) {
+            throw new IllegalArgumentException(
+                    String.format("Talent was not found with id %s", updateTalent.getId())
+            );
+        }
+
+        return null;
     }
 
 }
