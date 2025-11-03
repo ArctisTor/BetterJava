@@ -18,6 +18,8 @@ dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'
     implementation 'org.json:json:20240303'
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.2'
+
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
 
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.6.15.Final'
