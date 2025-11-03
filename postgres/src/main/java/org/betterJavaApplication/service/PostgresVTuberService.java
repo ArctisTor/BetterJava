@@ -4,38 +4,39 @@ import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.betterJavaApplication.connector.PostgresConnector;
-import org.betterJavaApplication.constants.PostgresQueryStatements;
-import org.betterJavaApplication.entity.OrganizationEntity;
 import org.betterJavaApplication.entity.TalentEntity;
-import org.betterJavaApplication.repository.OrganizationRepository;
 import org.betterJavaApplication.repository.TalentRepository;
 import org.betterJavaApplication.utils.EntityToObjectMapper;
-import org.constants.VTuberConstants;
+import org.object.Organization;
 import org.object.Talent;
+import org.service.OrganizationService;
 import org.service.VTuberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.validator.OrganizationValidator;
+import org.validator.TalentValidator;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PostgresVTuberService implements VTuberService {
 
     private final PostgresConnector postgresConnector;
     private final TalentRepository talentRepository;
-    private final OrganizationRepository organizationRepository;
+    private final OrganizationService organizationService;
     private final Gson gson = new Gson();
+    private final OrganizationValidator organizationValidator = new OrganizationValidator();
+    private final TalentValidator talentValidator;
 
     @Autowired
-    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository, OrganizationRepository organizationRepository) {
+    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository, OrganizationService organizationService) {
         this.postgresConnector = postgresConnector;
         this.talentRepository = talentRepository;
-        this.organizationRepository = organizationRepository;
+        this.organizationService = organizationService;
+        this.talentValidator = new TalentValidator(this.organizationService);
     }
 
     @PostConstruct
@@ -50,18 +51,12 @@ public class PostgresVTuberService implements VTuberService {
 
     @Override
     public List<Talent> getAllVTubers() {
-
-//        try (Statement stmt = this.postgresConnector.getPostgresConnection().createStatement()){
-//            return vtuberResultSetMapping(stmt.executeQuery(PostgresQueryStatements.SELECT_ALL_VTUBERS));
-//        } catch (SQLException e) {
-//            System.out.println("Error with querying database: " + e.getMessage());
-//        }
-        List<OrganizationEntity> organizationEntities = this.organizationRepository.findAll();
+        List<Organization> organizationList = this.organizationService.getAllOrganizations();
         List<Talent> talentList = new ArrayList<>();
         Iterable<TalentEntity> itr = this.talentRepository.findAll();
         itr.forEach(talentEntity -> {
-            Optional<OrganizationEntity> matchingOrganization = organizationEntities.stream()
-                    .filter(organizationEntity -> organizationEntity.getId().equals(talentEntity.getTalent_organization()))
+            Optional<Organization> matchingOrganization = organizationList.stream()
+                    .filter(organization -> organization.getId().equals(talentEntity.getTalent_organization()))
                     .findFirst();
             matchingOrganization.ifPresent(organizationEntity -> {
                 talentEntity.setTalent_organization(organizationEntity.getName());
@@ -75,9 +70,9 @@ public class PostgresVTuberService implements VTuberService {
     @Override
     public List<Talent> getByOrganization(String orgName) {
         List<Talent> talentList = new ArrayList<>();
-        Optional<OrganizationEntity> organizationOptional = organizationRepository.findByName(orgName);
-        if (organizationOptional.isPresent()) {
-            String orgId = organizationOptional.get().getId();
+        Organization organization = organizationService.getOrganizationByName(orgName);
+        if (organizationValidator.isOrganizationValid(organization)) {
+            String orgId = organization.getId();
             List<TalentEntity> list = this.talentRepository.findByOrganization(orgId);
             list.forEach(talentEntity -> {
                 talentList.add(EntityToObjectMapper.toTalentModel(talentEntity));
@@ -89,11 +84,31 @@ public class PostgresVTuberService implements VTuberService {
     }
 
     @Override
+    public Talent getVTuberTalentById(String id) {
+        Optional<TalentEntity> foundTalent = this.talentRepository.findById(id);
+        return foundTalent.map(EntityToObjectMapper::toTalentModel).orElse(null);
+    }
+
+    @Override
+    public List<Talent> getVTuberTalentByName(String name) {
+        List<TalentEntity> foundTalents = this.talentRepository.findByName(name);
+        List<Talent> talentList = new ArrayList<>();
+        foundTalents.forEach(talentEntity -> {
+            talentList.add(EntityToObjectMapper.toTalentModel(talentEntity));
+        });
+        return talentList;
+    }
+
+    @Override
     public Talent getShortestTalent() {
         Optional<TalentEntity> shortestTalent = this.talentRepository.findShortestTalent();
         if (shortestTalent.isPresent()) {
-            Optional<OrganizationEntity> org = this.organizationRepository.findById(shortestTalent.get().getTalent_organization());
-            org.ifPresent(organizationEntity -> shortestTalent.get().setTalent_organization(organizationEntity.getName()));
+            Organization org = this.organizationService.getOrganizationById(shortestTalent.get().getTalent_organization());
+            if (organizationValidator.isOrganizationValid(org)) {
+                shortestTalent.get().setTalent_organization(org.getName());
+            } else {
+                throw new RuntimeException(String.format("No Organizations found for: %s", shortestTalent.get().getName()));
+            }
             return EntityToObjectMapper.toTalentModel(shortestTalent.get());
         } else {
             throw new RuntimeException("No talents found");
@@ -103,31 +118,37 @@ public class PostgresVTuberService implements VTuberService {
 
     @Override
     public Talent debutVTuberTalent(Talent newTalent) {
+        if (!this.talentValidator.isTalentValid(newTalent)) {
+            throw new IllegalArgumentException("Talent was not a valid format.");
+        }
+
         try {
+            if (newTalent.getId().isBlank()) {
+                newTalent.setId(String.valueOf(UUID.randomUUID()));
+            }
             TalentEntity debutTalent = this.talentRepository.save(new TalentEntity(newTalent));
             return EntityToObjectMapper.toTalentModel(debutTalent);
         } catch (Exception e) {
-            throw new RuntimeException("There was an error debuting the talent." , e);
+            throw new RuntimeException("There was an error debuting the talent.", e);
         }
     }
 
-
-    private List<Talent> vtuberResultSetMapping(ResultSet rs) throws SQLException {
-        List<Talent> vTuberList = new ArrayList<>();
-
-        while(rs.next()) {
-            Talent vTuber = new Talent();
-            vTuber.setId(rs.getString(VTuberConstants.TALENT_ID));
-            vTuber.setName(rs.getString(VTuberConstants.TALENT_NAME));
-            vTuber.setDebut(rs.getDate(VTuberConstants.TALENT_DEBUT).toString());
-            vTuber.setBirthday(rs.getDate(VTuberConstants.TALENT_BIRTHDAY).toString());
-            vTuber.setOrganization(rs.getString(VTuberConstants.TALENT_ORGANIZATION));
-            vTuber.setUnit(rs.getString(VTuberConstants.TALENT_UNIT));
-            vTuber.setHeight(rs.getDouble(VTuberConstants.TALENT_HEIGHT));
-            vTuber.setFanName(rs.getString(VTuberConstants.TALENT_FAN_NAME));
-            vTuberList.add(vTuber);
+    @Override
+    public Talent updateVTuberTalent(Talent updateTalent) {
+        if (!this.talentValidator.isTalentValid(updateTalent)
+                || updateTalent.getId() == null || updateTalent.getId().isBlank()) {
+            throw new IllegalArgumentException("Talent was not a valid format.");
         }
 
-        return vTuberList;
+        //check to see if it exists
+        Talent checkTalent = this.getVTuberTalentById(updateTalent.getId());
+        if (checkTalent == null) {
+            throw new IllegalArgumentException(
+                    String.format("Talent was not found with id %s", updateTalent.getId())
+            );
+        }
+
+        return null;
     }
+
 }
