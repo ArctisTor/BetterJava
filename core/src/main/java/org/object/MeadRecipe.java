@@ -18,6 +18,13 @@ public class MeadRecipe extends HashMap<String, Object> {
         this.put("recipe_id", recipeId);
     }
 
+    public Long getRecipeId() {
+        Object value = this.get("recipe_id");
+        if (value instanceof Number) return ((Number) value).longValue();
+        return null;
+    }
+
+
     // Convenience setters
     public void setName(String name) {
         this.put("name", name);
@@ -81,7 +88,6 @@ public class MeadRecipe extends HashMap<String, Object> {
         return null;
     }
 
-    // Example method: add an ingredient section dynamically
     public void addIngredientSection(String sectionName, List<String> items) {
         JsonNode ingredientsNode = this.getIngredients();
         try {
@@ -99,7 +105,6 @@ public class MeadRecipe extends HashMap<String, Object> {
         }
     }
 
-    // Example method: add a step section dynamically
     public void addStepSection(String title, List<String> steps) {
         JsonNode stepsNode = this.getSteps();
         try {

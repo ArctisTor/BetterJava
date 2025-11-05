@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,4 +33,22 @@ public class MeadController {
         response.add("Meads", meadArray);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PutMapping()
+    public ResponseEntity<JsonObject> updateMeadRecipe(@RequestBody MeadRecipe updateMead) {
+        JsonObject response = new JsonObject();
+        if (updateMead.getRecipeId() == null) {
+            response.addProperty("error", "ID is empty");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (this.meadRecipeService.updateMeadRecipe(updateMead)) {
+            response.addProperty("success", String.format("Updated mead: %s", updateMead.getRecipeId()));
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            response.addProperty("error", String.format("Could not update mead: %s", updateMead.getRecipeId()));
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 }

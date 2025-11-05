@@ -19,6 +19,7 @@ import org.validator.MeadRecipeValidator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostgresMeadRecipeService implements MeadRecipeService {
@@ -48,7 +49,6 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
     @Override
     public List<MeadRecipe> getAllMeadRecipes()  {
         List<MeadRecipe> meadRecipeList = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
 
         for (MeadRecipeEntity entity : meadRecipeRepository.findAll()) {
             MeadRecipe recipe = new MeadRecipe();
@@ -88,6 +88,16 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
         return meadRecipeList;
     }
 
+    @Override
+    public boolean updateMeadRecipe(MeadRecipe meadRecipe) {
+        Optional<MeadRecipeEntity> existingMeadRecipe = meadRecipeRepository.findById(meadRecipe.getRecipeId());
+        if (existingMeadRecipe.isPresent()) {
+            MeadRecipeEntity convertedRecipe = new MeadRecipeEntity(meadRecipe);
+            MeadRecipeEntity saved = meadRecipeRepository.save(convertedRecipe);
+            return saved.getRecipeId() != null;
+        }
+        return false;
+    }
 
 
 }
