@@ -1,10 +1,10 @@
 package org.object;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MeadRecipe extends HashMap<String, Object> {
 
@@ -14,14 +14,12 @@ public class MeadRecipe extends HashMap<String, Object> {
         super();
     }
 
-    public void setRecipeId(Long recipeId) {
+    public void setRecipeId(String recipeId) {
         this.put("recipe_id", recipeId);
     }
 
-    public Long getRecipeId() {
-        Object value = this.get("recipe_id");
-        if (value instanceof Number) return ((Number) value).longValue();
-        return null;
+    public String getRecipeId() {
+        return (String) this.get("recipe_id");
     }
 
 
@@ -46,8 +44,58 @@ public class MeadRecipe extends HashMap<String, Object> {
         this.put("ingredients", ingredients);
     }
 
+    public List<MeadIngredients> getIngredients() {
+        Object value = this.get("ingredients");
+        if (value instanceof List<?> list) {
+            Gson gson = new Gson();
+
+            // Convert LinkedTreeMap to MeadIngredients
+            return list.stream()
+                    .map(item -> {
+                        if (item instanceof MeadIngredients mi) {
+                            return mi; // already correct type
+                        } else if (item instanceof java.util.Map) {
+                            // Convert LinkedTreeMap -> JSON -> MeadIngredients
+                            String json = gson.toJson(item);
+                            return gson.fromJson(json, MeadIngredients.class);
+                        } else {
+                            return null; // unexpected type
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+
+
     public void setSteps(List<MeadSteps> steps) {
         this.put("steps", steps);
+    }
+
+    public List<MeadSteps> getSteps() {
+        Object value = this.get("steps");
+        if (value instanceof List<?> list) {
+            Gson gson = new Gson();
+
+            // Convert LinkedTreeMap -> MeadSteps
+            return list.stream()
+                    .map(item -> {
+                        if (item instanceof MeadSteps step) {
+                            return step; // already correct type
+                        } else if (item instanceof Map<?, ?> map) {
+                            // Convert LinkedTreeMap -> JSON -> MeadSteps
+                            String json = gson.toJson(map);
+                            return gson.fromJson(json, MeadSteps.class);
+                        } else {
+                            return null; // unexpected type
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
 
@@ -66,60 +114,6 @@ public class MeadRecipe extends HashMap<String, Object> {
 
     public String getFlavorNotes() {
         return (String) this.get("flavor_notes");
-    }
-
-    public JsonNode getIngredients() {
-        Object obj = this.get("ingredients");
-        if (obj instanceof JsonNode) return (JsonNode) obj;
-        else if (obj instanceof String) {
-            try { return mapper.readTree((String) obj); }
-            catch (Exception e) { e.printStackTrace(); return null; }
-        }
-        return null;
-    }
-
-    public JsonNode getSteps() {
-        Object obj = this.get("steps");
-        if (obj instanceof JsonNode) return (JsonNode) obj;
-        else if (obj instanceof String) {
-            try { return mapper.readTree((String) obj); }
-            catch (Exception e) { e.printStackTrace(); return null; }
-        }
-        return null;
-    }
-
-    public void addIngredientSection(String sectionName, List<String> items) {
-        JsonNode ingredientsNode = this.getIngredients();
-        try {
-            if (ingredientsNode == null || ingredientsNode.isNull()) {
-                ingredientsNode = mapper.createArrayNode();
-            }
-            ((com.fasterxml.jackson.databind.node.ArrayNode) ingredientsNode).add(
-                    mapper.createObjectNode()
-                            .put("section", sectionName)
-                            .set("items", mapper.valueToTree(items))
-            );
-            this.put("ingredients", ingredientsNode);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addStepSection(String title, List<String> steps) {
-        JsonNode stepsNode = this.getSteps();
-        try {
-            if (stepsNode == null || stepsNode.isNull()) {
-                stepsNode = mapper.createArrayNode();
-            }
-            ((com.fasterxml.jackson.databind.node.ArrayNode) stepsNode).add(
-                    mapper.createObjectNode()
-                            .put("title", title)
-                            .set("steps", mapper.valueToTree(steps))
-            );
-            this.put("steps", stepsNode);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
 

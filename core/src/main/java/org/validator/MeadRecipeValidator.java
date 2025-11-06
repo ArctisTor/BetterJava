@@ -1,7 +1,10 @@
 package org.validator;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.object.MeadIngredients;
 import org.object.MeadRecipe;
+import org.object.MeadSteps;
+
+import java.util.List;
 
 public class MeadRecipeValidator {
 
@@ -50,19 +53,26 @@ public class MeadRecipeValidator {
      * Validates the ingredients JSON structure.
      * Expects an array of objects with "section" and "items" fields.
      */
-    private boolean validateIngredients(JsonNode ingredients) {
-        if (ingredients == null || !ingredients.isArray() || ingredients.isEmpty()) {
-            System.out.println("Ingredients JSON must be a non-empty array.");
+    private boolean validateIngredients(List<MeadIngredients> ingredients) {
+        if (ingredients.isEmpty()) {
+            System.out.println("Ingredients must be a non-empty array.");
             return false;
         }
 
-        for (JsonNode section : ingredients) {
-            if (!section.has("section") || !section.has("items")) {
-                System.out.println("Each ingredient section must have 'section' and 'items'.");
+        for (MeadIngredients ingredient: ingredients) {
+            // Check if section is null or blank
+            if (ingredient.getSection() == null || ingredient.getSection().isBlank()) {
                 return false;
             }
-            if (!section.get("items").isArray() || section.get("items").isEmpty()) {
-                System.out.println("Ingredient items must be a non-empty array.");
+
+            // Check if items list is null or empty
+            List<String> items = ingredient.getItems();
+            if (items == null || items.isEmpty()) {
+                return false;
+            }
+
+            // Check if any item is null or blank
+            if (items.stream().anyMatch(s -> s == null || s.isBlank())) {
                 return false;
             }
         }
@@ -74,19 +84,26 @@ public class MeadRecipeValidator {
      * Validates the steps JSON structure.
      * Expects an array of objects with "title" and "steps" fields.
      */
-    private boolean validateSteps(JsonNode steps) {
-        if (steps == null || !steps.isArray() || steps.isEmpty()) {
-            System.out.println("Steps JSON must be a non-empty array.");
+    private boolean validateSteps(List<MeadSteps> steps) {
+        if (steps.isEmpty()) {
+            System.out.println("Steps must be a non-empty array.");
             return false;
         }
 
-        for (JsonNode stepSection : steps) {
-            if (!stepSection.has("title") || !stepSection.has("steps")) {
-                System.out.println("Each step section must have 'title' and 'steps'.");
+        for (MeadSteps meadSteps: steps) {
+            // Check if Title is null or blank
+            if (meadSteps.getTitle() == null || meadSteps.getTitle().isBlank()) {
                 return false;
             }
-            if (!stepSection.get("steps").isArray() || stepSection.get("steps").isEmpty()) {
-                System.out.println("Steps array in a section must not be empty.");
+
+            // Check if steps list is null or empty
+            List<String> steps1 = meadSteps.getSteps();
+            if (steps1 == null || steps1.isEmpty()) {
+                return false;
+            }
+
+            // Check if any item is null or blank
+            if (steps1.stream().anyMatch(s -> s == null || s.isBlank())) {
                 return false;
             }
         }

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.object.MeadRecipe;
-import org.object.Talent;
 import org.service.MeadRecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,10 +26,15 @@ public class MeadController {
         JsonObject response = new JsonObject();
         JsonArray meadArray = new JsonArray();
         List<MeadRecipe> meadRecipeList = this.meadRecipeService.getAllMeadRecipes();
-        meadRecipeList.forEach(meadRecipe -> {
-            meadArray.add(gson.toJsonTree(meadRecipe));
-        });
+        meadRecipeList.forEach(meadRecipe -> meadArray.add(gson.toJsonTree(meadRecipe)));
         response.add("Meads", meadArray);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping()
+    public ResponseEntity<JsonObject> addMeadRecipe(@RequestBody MeadRecipe newMead) {
+        JsonObject response = new JsonObject();
+        response = this.meadRecipeService.addMeadRecipe(newMead);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -44,11 +48,10 @@ public class MeadController {
 
         if (this.meadRecipeService.updateMeadRecipe(updateMead)) {
             response.addProperty("success", String.format("Updated mead: %s", updateMead.getRecipeId()));
-            return ResponseEntity.badRequest().body(response);
         } else {
             response.addProperty("error", String.format("Could not update mead: %s", updateMead.getRecipeId()));
-            return ResponseEntity.badRequest().body(response);
         }
+        return ResponseEntity.badRequest().body(response);
     }
 
 }

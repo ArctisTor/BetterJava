@@ -3,6 +3,7 @@ package org.betterJavaApplication.entity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import org.object.MeadRecipe;
 
 import java.util.List;
@@ -11,8 +12,12 @@ import java.util.List;
 @Table(name = "mead_recipes")
 public class MeadRecipeEntity {
 
+
     @Id
-    private Long recipeId;
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "recipe_id", updatable = false, nullable = false)
+    private String recipeId;
 
     private String name;
     private Double batchSizeGallons;
@@ -48,8 +53,8 @@ public class MeadRecipeEntity {
     }
 
     // Getters and setters
-    public Long getRecipeId() { return recipeId; }
-    public void setRecipeId(Long recipeId) { this.recipeId = recipeId; }
+    public String getRecipeId() { return recipeId; }
+    public void setRecipeId(String recipeId) { this.recipeId = recipeId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

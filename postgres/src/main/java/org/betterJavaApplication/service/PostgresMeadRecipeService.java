@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.betterJavaApplication.connector.PostgresConnector;
@@ -20,6 +21,7 @@ import org.validator.MeadRecipeValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PostgresMeadRecipeService implements MeadRecipeService {
@@ -97,6 +99,41 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
             return saved.getRecipeId() != null;
         }
         return false;
+    }
+
+    @Override
+    public JsonObject addMeadRecipe(MeadRecipe meadRecipe) {
+        JsonObject response = new JsonObject();
+        if (!meadRecipeValidator.validate(meadRecipe)) {
+            response.addProperty("error", String.format("%s is not a valid mead recipe.", meadRecipe.getName()));
+            return response;
+        }
+
+        //Checks to see if it already exists
+        if (meadRecipe.getRecipeId() != null && !meadRecipe.getRecipeId().isBlank()) {
+            String id = meadRecipe.getRecipeId();
+            Optional<MeadRecipeEntity> existingMeadRecipe = meadRecipeRepository.findById(id);
+            if (existingMeadRecipe.isPresent()) {
+                response.addProperty(
+                        "error",
+                        String.format("There was an error creating mead recipe: %s already exists", meadRecipe.getName()
+                        )
+                );
+                return response;
+            }
+        }
+
+        MeadRecipeEntity convertedRecipe = new MeadRecipeEntity(meadRecipe);
+        MeadRecipeEntity saved = meadRecipeRepository.save(convertedRecipe);
+        if (!saved.getRecipeId().isBlank()) {
+            response.addProperty(
+                    "success",
+                    String.format("Successfully created mead recipe %s for %s", saved.getRecipeId(), saved.getName())
+            );
+        } else {
+            response.addProperty("error", String.format("There was an error creating mead recipe %s", convertedRecipe.getName()));
+        }
+        return response;
     }
 
 
