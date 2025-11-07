@@ -1,6 +1,6 @@
-package org.betterJavaApplication.repository;
+package org.betterJavaApplication.repository.vtubers;
 
-import org.betterJavaApplication.entity.OrganizationEntity;
+import org.betterJavaApplication.entity.vtubers.OrganizationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

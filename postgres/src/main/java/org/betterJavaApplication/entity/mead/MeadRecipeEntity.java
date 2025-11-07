@@ -1,4 +1,4 @@
-package org.betterJavaApplication.entity;
+package org.betterJavaApplication.entity.mead;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

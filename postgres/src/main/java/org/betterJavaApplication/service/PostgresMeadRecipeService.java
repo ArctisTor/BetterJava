@@ -7,9 +7,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.betterJavaApplication.connector.PostgresConnector;
-import org.betterJavaApplication.entity.MeadRecipeEntity;
-import org.betterJavaApplication.repository.MeadRecipeRepository;
+import org.betterJavaApplication.entity.mead.MeadRecipeEntity;
+import org.betterJavaApplication.repository.mead.MeadRecipeRepository;
 import org.object.MeadIngredients;
 import org.object.MeadRecipe;
 import org.object.MeadSteps;
@@ -21,7 +23,6 @@ import org.validator.MeadRecipeValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class PostgresMeadRecipeService implements MeadRecipeService {
@@ -31,6 +32,9 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
     private final Gson gson = new Gson();
     ObjectMapper mapper = new ObjectMapper();
     private final MeadRecipeValidator meadRecipeValidator = new MeadRecipeValidator();
+
+    @PersistenceContext(unitName = "meadPU")
+    private EntityManager entityManager;
 
     @Autowired
     public PostgresMeadRecipeService(PostgresConnector postgresConnector, MeadRecipeRepository meadRecipeRepository) {

@@ -1,4 +1,4 @@
-package org.betterJavaApplication.entity;
+package org.betterJavaApplication.entity.vtubers;
 
 import com.google.gson.JsonObject;
 import jakarta.persistence.*;
