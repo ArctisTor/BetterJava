@@ -37,15 +37,6 @@ public class MeadJpaConfig {
     }
 
     // ---------------------------
-    // MEAD JPA Properties
-    // ---------------------------
-    @Bean(name = "meadJpaProperties")
-    @ConfigurationProperties(prefix = "spring.jpa.mead")
-    public JpaProperties meadJpaProperties() {
-        return new JpaProperties();
-    }
-
-    // ---------------------------
     // MEAD EntityManagerFactory
     // ---------------------------
     @Bean(name = "meadEntityManagerFactory")

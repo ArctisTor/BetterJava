@@ -39,16 +39,6 @@ public class VTubersJpaConfig {
     }
 
     // ---------------------------
-    // VTUBERS JPA Properties
-    // ---------------------------
-    @Primary
-    @Bean(name = "vtubersJpaProperties")
-    @ConfigurationProperties(prefix = "spring.jpa.vtubers")
-    public JpaProperties vtubersJpaProperties() {
-        return new JpaProperties();
-    }
-
-    // ---------------------------
     // VTUBERS EntityManagerFactory
     // ---------------------------
     @Primary
