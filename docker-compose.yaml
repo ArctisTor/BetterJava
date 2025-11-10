@@ -1,63 +1,53 @@
-networks:
-  betterjava_network :
-    ipam:
-      config:
-        - subnet: 10.5.0.0/16
+version: "3.9"
+
 services:
-  betterjava:
-   build: . # /path/to/dockerfile or https://github.com/my-company/my-project.git
-   image: betterjava-image #name of the image
-   ports:
-    - "8080:9000"
-   depends_on:
-    postgres_db:
-      condition: service_healthy
-   environment:
-    # old properties
-     #spring.datasource.vtubers.url : jdbc:postgresql://10.5.0.6:5432/VTubers
-     #spring.datasource.mead.url : jdbc:postgresql://10.5.0.6:5432:5432/Mead
-     #spring.datasource.vtubers.username : admin
-     #spring.datasource.vtubers.password : admin
-     #spring.datasource.mead.username: admin
-     #spring.datasource.mead.password: admin
-    # VTubers datasource
-    SPRING_DATASOURCE_VTUBERS_JDBC_URL: jdbc:postgresql://10.5.0.6:5432/VTubers
-    SPRING_DATASOURCE_VTUBERS_USERNAME: admin
-    SPRING_DATASOURCE_VTUBERS_PASSWORD: admin
-
-    # Mead datasource
-    SPRING_DATASOURCE_MEAD_JDBC_URL: jdbc:postgresql://10.5.0.6:5432/Mead
-    SPRING_DATASOURCE_MEAD_USERNAME: admin
-    SPRING_DATASOURCE_MEAD_PASSWORD: admin
-
-    # Generic PostgreSQL info for your app
-    POSTGRES_HOST: 10.5.0.6
-    POSTGRES_PORT: 5432
-    POSTGRES_USER: admin
-    POSTGRES_PASSWORD: admin
-   networks:
-    betterjava_network:
-      ipv4_address: 10.5.0.5
   postgres_db:
-    image: 'postgres:17'
-    restart: always
+    image: postgres:17
     container_name: postgres_db
-    ports:
-      - "9001:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d VTubers" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: VTubers
-      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./VTubers_DB_v4.sql:/docker-entrypoint-initdb.d/VTubers.sql
-    command: "bash -c 'rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres'"
+      - postgres_data:/var/lib/postgresql/data   # persistent storage
+      - ./DATABASE_FILES/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./DATABASE_FILES/VTubers_DB_v4.sql:/docker-entrypoint-initdb.d/VTubers_DB_v4.sql:ro
+      - ./DATABASE_FILES/Mead_DB.sql:/docker-entrypoint-initdb.d/Mead_DB.sql:ro
+    ports:
+      - "9001:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - betterjava_network
+
+  betterjava:
+    build: .
+    image: betterjava-image
+    ports:
+      - "8080:9000"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    environment:
+      spring.datasource.vtubers.jdbc-url: jdbc:postgresql://postgres_db:5432/VTubers
+      spring.datasource.vtubers.username: admin
+      spring.datasource.vtubers.password: admin
+
+      spring.datasource.mead.jdbc-url: jdbc:postgresql://postgres_db:5432/Mead
+      spring.datasource.mead.username: admin
+      spring.datasource.mead.password: admin
     networks:
       betterjava_network:
-        ipv4_address: 10.5.0.6
+        ipv4_address: 10.5.0.5
+
+volumes:
+  postgres_data:
+
+networks:
+  betterjava_network:
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
