@@ -13,13 +13,28 @@ services:
     postgres_db:
       condition: service_healthy
    environment:
-    spring.datasource.url : jdbc:postgresql://10.5.0.6:5432/VTubers
-    spring.datasource.username : admin
-    spring.datasource.password : admin
-    postgres.host : 10.5.0.6
-    postgres.port : 5432
-    postgres.user : admin
-    postgres.password : admin
+    # old properties
+     #spring.datasource.vtubers.url : jdbc:postgresql://10.5.0.6:5432/VTubers
+     #spring.datasource.mead.url : jdbc:postgresql://10.5.0.6:5432:5432/Mead
+     #spring.datasource.vtubers.username : admin
+     #spring.datasource.vtubers.password : admin
+     #spring.datasource.mead.username: admin
+     #spring.datasource.mead.password: admin
+    # VTubers datasource
+    SPRING_DATASOURCE_VTUBERS_JDBC_URL: jdbc:postgresql://10.5.0.6:5432/VTubers
+    SPRING_DATASOURCE_VTUBERS_USERNAME: admin
+    SPRING_DATASOURCE_VTUBERS_PASSWORD: admin
+
+    # Mead datasource
+    SPRING_DATASOURCE_MEAD_JDBC_URL: jdbc:postgresql://10.5.0.6:5432/Mead
+    SPRING_DATASOURCE_MEAD_USERNAME: admin
+    SPRING_DATASOURCE_MEAD_PASSWORD: admin
+
+    # Generic PostgreSQL info for your app
+    POSTGRES_HOST: 10.5.0.6
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: admin
+    POSTGRES_PASSWORD: admin
    networks:
     betterjava_network:
       ipv4_address: 10.5.0.5
