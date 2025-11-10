@@ -24,7 +24,7 @@ services:
       - betterjava_network
 
   betterjava:
-    build: .
+    build: ..
     image: betterjava-image
     ports:
       - "8080:9000"
