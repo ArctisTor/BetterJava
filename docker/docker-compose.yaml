@@ -26,6 +26,7 @@ services:
   betterjava:
     build: ..
     image: betterjava-image
+    container_name: java-container
     ports:
       - "8080:9000"
     depends_on:
