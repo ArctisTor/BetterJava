@@ -10,9 +10,9 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data   # persistent storage
-      - ./DATABASE_FILES/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./DATABASE_FILES/VTubers_DB_v4.sql:/docker-entrypoint-initdb.d/VTubers_DB_v4.sql:ro
-      - ./DATABASE_FILES/Mead_DB.sql:/docker-entrypoint-initdb.d/Mead_DB.sql:ro
+      - ./DATABASE_FILES/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./DATABASE_FILES/VTubers_DB_v4.sql:/docker-entrypoint-initdb.d/VTubers_DB_v4.sql
+      - ./DATABASE_FILES/Mead_DB.sql:/docker-entrypoint-initdb.d/Mead_DB.sql
     ports:
       - "9001:5432"
     healthcheck:
@@ -24,9 +24,9 @@ services:
       - betterjava_network
 
   betterjava:
-    build: ..
-    image: betterjava-image
-    container_name: java-container
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:9000"
     depends_on:
