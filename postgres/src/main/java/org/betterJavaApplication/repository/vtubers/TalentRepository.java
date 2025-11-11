@@ -1,6 +1,6 @@
-package org.betterJavaApplication.repository;
+package org.betterJavaApplication.repository.vtubers;
 
-import org.betterJavaApplication.entity.TalentEntity;
+import org.betterJavaApplication.entity.vtubers.TalentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

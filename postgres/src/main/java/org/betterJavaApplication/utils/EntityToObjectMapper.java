@@ -1,8 +1,8 @@
 package org.betterJavaApplication.utils;
 
 import com.google.gson.JsonObject;
-import org.betterJavaApplication.entity.OrganizationEntity;
-import org.betterJavaApplication.entity.TalentEntity;
+import org.betterJavaApplication.entity.vtubers.OrganizationEntity;
+import org.betterJavaApplication.entity.vtubers.TalentEntity;
 import org.object.Organization;
 import org.object.Talent;
 
