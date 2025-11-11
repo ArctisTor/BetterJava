@@ -21,9 +21,11 @@ services:
       timeout: 5s
       retries: 20
     networks:
-      - betterjava_network
+      betterjava_network:
+        ipv4_address: 10.5.0.6
 
   betterjava:
+    container_name: java_backend
     build:
       context: .
       dockerfile: Dockerfile
