@@ -12,15 +12,14 @@ import jakarta.persistence.PersistenceContext;
 import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.mead.MeadRecipeEntity;
 import org.betterJavaApplication.repository.mead.MeadRecipeRepository;
-import org.object.MeadIngredients;
 import org.object.MeadRecipe;
-import org.object.MeadSteps;
 import org.service.MeadRecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.MeadRecipeValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,10 +52,11 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
     }
 
     @Override
-    public List<MeadRecipe> getAllMeadRecipes()  {
-        List<MeadRecipe> meadRecipeList = new ArrayList<>();
+    public List<MeadRecipe> getAllMeadRecipes(int limit, int offset) {
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        List<MeadRecipeEntity> entities = meadRecipeRepository.findAll(pageable).getContent();
 
-        for (MeadRecipeEntity entity : meadRecipeRepository.findAll()) {
+        return entities.stream().map(entity -> {
             MeadRecipe recipe = new MeadRecipe();
             recipe.setRecipeId(entity.getRecipeId());
             recipe.setName(entity.getName());
@@ -64,34 +64,15 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
             recipe.setAbv(entity.getAbv());
             recipe.setFlavorNotes(entity.getFlavorNotes());
 
-            List<MeadIngredients> ingredients;
-            List<MeadSteps> steps;
-
             try {
-                ingredients = mapper.readValue(
-                        entity.getIngredients(),
-                        new TypeReference<>() {
-                        }
-                );
-
-                steps = mapper.readValue(
-                        entity.getSteps(),
-                        new TypeReference<>() {
-                        }
-                );
+                recipe.setIngredients(mapper.readValue(entity.getIngredients(), new TypeReference<>() {}));
+                recipe.setSteps(mapper.readValue(entity.getSteps(), new TypeReference<>() {}));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to parse mead recipe JSON for recipe ID " + entity.getRecipeId(), e);
             }
 
-            recipe.setIngredients(ingredients);
-            recipe.setSteps(steps);
-
-
-
-            meadRecipeList.add(recipe);
-        }
-
-        return meadRecipeList;
+            return recipe;
+        }).toList();
     }
 
     @Override

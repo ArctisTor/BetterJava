@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MeadRecipeService {
 
-    List<MeadRecipe> getAllMeadRecipes();
+    List<MeadRecipe> getAllMeadRecipes(int limit, int offset);
     boolean updateMeadRecipe(MeadRecipe meadRecipe);
     JsonObject addMeadRecipe(MeadRecipe meadRecipe);
 }
