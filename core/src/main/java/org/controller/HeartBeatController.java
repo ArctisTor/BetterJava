@@ -1,8 +1,6 @@
 package org.controller;
 
-
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.service.ConfigurationInfoService;
 import org.service.DatabaseTestConnectionService;
@@ -28,9 +26,9 @@ public class HeartBeatController {
     public ResponseEntity<JsonObject> getHeartBeat() {
         JsonObject response = new JsonObject();
 
-        //Version Info
+        // Version Info
         response.add("version-number", gson.toJsonTree(configurationInfoService.getVersionNumber()));
-        //Database Test
+        // Database Test
         response.add("database-info", databaseTestConnectionService.testConnection());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
