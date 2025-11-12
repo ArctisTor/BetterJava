@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/HeartBeat")
+@RequestMapping("api/v1/heartbeat")
 public class HeartBeatController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class HeartBeatController {
     private DatabaseTestConnectionService databaseTestConnectionService;
     private final Gson gson = new Gson();
 
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonObject> getHeartBeat() {
         JsonObject response = new JsonObject();
 

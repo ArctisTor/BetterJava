@@ -1,18 +1,32 @@
-#basic info
-version.number=1.0.0
-
-spring.mvc.converters.preferred-json-mapper=gson
-
+# ---------------------------
+# Basic application info
+# ---------------------------
+version.number=1.1.0
 server.port=9000
+spring.mvc.converters.preferred-json-mapper=gson
+spring.main.allow-bean-definition-overriding=true
 
-#postgres information
-postgres.host=
-postgres.port=
-postgres.user=
-postgres.password=
+# ---------------------------
+# VTubers database
+# ---------------------------
+spring.datasource.vtubers.jdbc-url=jdbc:postgresql://localhost:5432/VTubers
+spring.datasource.vtubers.username=<YOUR_USERNAME>
+spring.datasource.vtubers.password=<YOUR_PASSWORD>
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/<YOUR_DATABASE_NAME>
-spring.datasource.username=<YOUR_USERNAME>
-spring.datasource.password=<YOUR_PASSWORD>
-spring.jpa.hibernate.ddl-auto=<create | create-drop | update | validate | none>
+# ---------------------------
+# Mead database
+# ---------------------------
+spring.datasource.mead.jdbc-url=jdbc:postgresql://localhost:5432/Mead
+spring.datasource.mead.username=<YOUR_USERNAME>
+spring.datasource.mead.password=<YOUR_PASSWORD>
+spring.datasource.mead.driver-class-name=org.postgresql.Driver
+
+# ---------------------------
+# Shared Hibernate/JPA properties
+# ---------------------------
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+#spring.jpa.hibernate.ddl-auto=<create | create-drop | update | validate | none>

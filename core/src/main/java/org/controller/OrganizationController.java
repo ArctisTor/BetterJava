@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Organization")
+@RequestMapping("api/v1/organization")
 public class OrganizationController {
 
     @Autowired
     private OrganizationService organizationService;
     private final Gson gson = new Gson();
 
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonObject> getAllOrganizations() {
         JsonObject response = new JsonObject();
         JsonArray orgArray = new JsonArray();
