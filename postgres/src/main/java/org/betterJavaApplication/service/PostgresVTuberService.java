@@ -12,6 +12,8 @@ import org.object.Talent;
 import org.service.OrganizationService;
 import org.service.VTuberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.OrganizationValidator;
 import org.validator.TalentValidator;
@@ -32,7 +34,8 @@ public class PostgresVTuberService implements VTuberService {
     private final TalentValidator talentValidator;
 
     @Autowired
-    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository, OrganizationService organizationService) {
+    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository,
+            OrganizationService organizationService) {
         this.postgresConnector = postgresConnector;
         this.talentRepository = talentRepository;
         this.organizationService = organizationService;
@@ -50,10 +53,11 @@ public class PostgresVTuberService implements VTuberService {
     }
 
     @Override
-    public List<Talent> getAllVTubers() {
+    public List<Talent> getAllVTubers(int limit, int offset) {
         List<Organization> organizationList = this.organizationService.getAllOrganizations();
         List<Talent> talentList = new ArrayList<>();
-        Iterable<TalentEntity> itr = this.talentRepository.findAll();
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Iterable<TalentEntity> itr = this.talentRepository.findAll(pageable).getContent();
         itr.forEach(talentEntity -> {
             Optional<Organization> matchingOrganization = organizationList.stream()
                     .filter(organization -> organization.getId().equals(talentEntity.getTalent_organization()))
@@ -103,11 +107,13 @@ public class PostgresVTuberService implements VTuberService {
     public Talent getShortestTalent() {
         Optional<TalentEntity> shortestTalent = this.talentRepository.findShortestTalent();
         if (shortestTalent.isPresent()) {
-            Organization org = this.organizationService.getOrganizationById(shortestTalent.get().getTalent_organization());
+            Organization org = this.organizationService
+                    .getOrganizationById(shortestTalent.get().getTalent_organization());
             if (organizationValidator.isOrganizationValid(org)) {
                 shortestTalent.get().setTalent_organization(org.getName());
             } else {
-                throw new RuntimeException(String.format("No Organizations found for: %s", shortestTalent.get().getName()));
+                throw new RuntimeException(
+                        String.format("No Organizations found for: %s", shortestTalent.get().getName()));
             }
             return EntityToObjectMapper.toTalentModel(shortestTalent.get());
         } else {
@@ -140,12 +146,11 @@ public class PostgresVTuberService implements VTuberService {
             throw new IllegalArgumentException("Talent was not a valid format.");
         }
 
-        //check to see if it exists
+        // check to see if it exists
         Talent checkTalent = this.getVTuberTalentById(updateTalent.getId());
         if (checkTalent == null) {
             throw new IllegalArgumentException(
-                    String.format("Talent was not found with id %s", updateTalent.getId())
-            );
+                    String.format("Talent was not found with id %s", updateTalent.getId()));
         }
 
         return null;

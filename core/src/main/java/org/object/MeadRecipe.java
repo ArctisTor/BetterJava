@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 public class MeadRecipe extends HashMap<String, Object> {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     public MeadRecipe() {
         super();
     }

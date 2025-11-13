@@ -22,14 +22,19 @@ public class VTuberController {
     private VTuberService vTuberService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<JsonObject> getAllVTubers() {
+    public ResponseEntity<JsonObject> getAllVTubers(
+            @RequestParam(name = "limit", required = false, defaultValue = "2147483647") int limit,
+            @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
         JsonObject response = new JsonObject();
         JsonArray vtuberArray = new JsonArray();
-        List<Talent> vtuberList = this.vTuberService.getAllVTubers();
+        List<Talent> vtuberList = this.vTuberService.getAllVTubers(limit, offset);
         vtuberList.forEach(vtuber -> {
             vtuberArray.add(gson.toJsonTree(vtuber));
         });
         response.add("Vtubers", vtuberArray);
+        response.addProperty("limit", limit);
+        response.addProperty("offset", offset);
+        response.addProperty("count", vtuberArray.size());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
