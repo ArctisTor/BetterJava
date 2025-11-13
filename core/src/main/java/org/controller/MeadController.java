@@ -2,7 +2,6 @@ package org.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.object.MeadRecipe;
 import org.service.MeadRecipeService;
@@ -35,6 +34,21 @@ public class MeadController {
         response.addProperty("limit", limit);
         response.addProperty("offset", offset);
         response.addProperty("count", meadRecipeList.size());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{name}")
+    public ResponseEntity<JsonObject> getMeadRecipeByName(@PathVariable("name") String name,
+            @RequestParam(name = "limit", required = false, defaultValue = "2147483647") int limit,
+            @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
+        JsonObject response = new JsonObject();
+        JsonArray meadArray = new JsonArray();
+        List<MeadRecipe> meadRecipes = this.meadRecipeService.getMeadRecipesByName(name);
+        meadRecipes.forEach(meadRecipe -> meadArray.add(gson.toJsonTree(meadRecipe)));
+        response.add("Meads", meadArray);
+        response.addProperty("limit", limit);
+        response.addProperty("offset", offset);
+        response.addProperty("count", meadRecipes.size());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

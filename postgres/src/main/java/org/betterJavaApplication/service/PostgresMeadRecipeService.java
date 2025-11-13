@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.MeadRecipeValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +54,15 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
         Pageable pageable = PageRequest.of(offset / limit, limit);
         List<MeadRecipeEntity> entities = meadRecipeRepository.findAll(pageable).getContent();
 
+        return entities.stream().map(entity -> {
+            MeadRecipe recipe = EntityToObjectMapper.toMeadRecipe(entity);
+            return recipe;
+        }).toList();
+    }
+
+    @Override
+    public List<MeadRecipe> getMeadRecipesByName(String name) {
+        List<MeadRecipeEntity> entities = meadRecipeRepository.findByNameContainingIgnoreCase(name);
         return entities.stream().map(entity -> {
             MeadRecipe recipe = EntityToObjectMapper.toMeadRecipe(entity);
             return recipe;

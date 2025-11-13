@@ -14,5 +14,7 @@ public interface MeadRecipeService {
 
     JsonObject addMeadRecipe(MeadRecipe meadRecipe);
 
+    List<MeadRecipe> getMeadRecipesByName(String name);
+
     Optional<MeadRecipe> deleteMeadRecipe(String id);
 }
