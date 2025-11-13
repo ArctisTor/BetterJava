@@ -10,6 +10,8 @@ import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.Organization;
 import org.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.OrganizationValidator;
 
@@ -22,13 +24,11 @@ public class PostgresOrganizationService implements OrganizationService {
 
     private final PostgresConnector postgresConnector;
     private final OrganizationRepository organizationRepository;
-    private final Gson gson = new Gson();
-    private final OrganizationValidator organizationValidator = new OrganizationValidator();
-    ;
-
+    private final OrganizationValidator organizationValidator = new OrganizationValidator();;
 
     @Autowired
-    public PostgresOrganizationService(PostgresConnector postgresConnector, OrganizationRepository organizationRepository) {
+    public PostgresOrganizationService(PostgresConnector postgresConnector,
+            OrganizationRepository organizationRepository) {
         this.postgresConnector = postgresConnector;
         this.organizationRepository = organizationRepository;
     }
@@ -44,9 +44,10 @@ public class PostgresOrganizationService implements OrganizationService {
     }
 
     @Override
-    public List<Organization> getAllOrganizations() {
+    public List<Organization> getAllOrganizations(int limit, int offset) {
         List<Organization> organizationList = new ArrayList<>();
-        Iterable<OrganizationEntity> organizationEntities = this.organizationRepository.findAll();
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Iterable<OrganizationEntity> organizationEntities = this.organizationRepository.findAll(pageable).getContent();
         organizationEntities.forEach(organizationEntity -> {
             organizationList.add(EntityToObjectMapper.toOrganizationModel(organizationEntity));
         });
@@ -76,7 +77,7 @@ public class PostgresOrganizationService implements OrganizationService {
     @Override
     public Organization addOrganization(Organization organization) {
         if (this.organizationValidator.isOrganizationValid(organization)) {
-            //TODO will need to implement this
+            // TODO will need to implement this
         }
         return null;
     }

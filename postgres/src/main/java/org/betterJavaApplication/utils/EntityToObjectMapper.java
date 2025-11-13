@@ -1,12 +1,20 @@
 package org.betterJavaApplication.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
+
+import org.betterJavaApplication.entity.mead.MeadRecipeEntity;
 import org.betterJavaApplication.entity.vtubers.OrganizationEntity;
 import org.betterJavaApplication.entity.vtubers.TalentEntity;
+import org.object.MeadRecipe;
 import org.object.Organization;
 import org.object.Talent;
 
 public class EntityToObjectMapper {
+
+    public static ObjectMapper mapper = new ObjectMapper();
 
     // Converts a Talent object to TalentEntity
     public static TalentEntity toTalentEntity(Talent talent) {
@@ -37,7 +45,6 @@ public class EntityToObjectMapper {
         return talentEntity.toJsonObject();
     }
 
-
     // Converts an Organization object to OrganizationEntity
     public static OrganizationEntity toOrganizationEntity(Organization organization) {
         return new OrganizationEntity(organization);
@@ -65,5 +72,30 @@ public class EntityToObjectMapper {
     // Converts an OrganizationEntity to JsonObject
     public static JsonObject toJsonObject(OrganizationEntity organizationEntity) {
         return organizationEntity.toJsonObject();
+    }
+
+    public static MeadRecipeEntity toMeadRecipeEntity(MeadRecipe meadRecipe) {
+        return new MeadRecipeEntity(meadRecipe);
+    }
+
+    public static MeadRecipe toMeadRecipe(MeadRecipeEntity meadRecipeEntity) {
+        MeadRecipe recipe = new MeadRecipe();
+        recipe.setRecipeId(meadRecipeEntity.getRecipeId());
+        recipe.setName(meadRecipeEntity.getName());
+        recipe.setBatchSizeGallons(meadRecipeEntity.getBatchSizeGallons());
+        recipe.setAbv(meadRecipeEntity.getAbv());
+        recipe.setFlavorNotes(meadRecipeEntity.getFlavorNotes());
+
+        try {
+            recipe.setIngredients(mapper.readValue(meadRecipeEntity.getIngredients(), new TypeReference<>() {
+            }));
+            recipe.setSteps(mapper.readValue(meadRecipeEntity.getSteps(), new TypeReference<>() {
+            }));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(
+                    "Failed to parse mead recipe JSON for recipe ID " + meadRecipeEntity.getRecipeId(), e);
+        }
+
+        return recipe;
     }
 }

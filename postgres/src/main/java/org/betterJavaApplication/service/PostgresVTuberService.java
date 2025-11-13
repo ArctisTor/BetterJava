@@ -54,7 +54,7 @@ public class PostgresVTuberService implements VTuberService {
 
     @Override
     public List<Talent> getAllVTubers(int limit, int offset) {
-        List<Organization> organizationList = this.organizationService.getAllOrganizations();
+        List<Organization> organizationList = this.organizationService.getAllOrganizations(Integer.MAX_VALUE, 0);
         List<Talent> talentList = new ArrayList<>();
         Pageable pageable = PageRequest.of(offset / limit, limit);
         Iterable<TalentEntity> itr = this.talentRepository.findAll(pageable).getContent();

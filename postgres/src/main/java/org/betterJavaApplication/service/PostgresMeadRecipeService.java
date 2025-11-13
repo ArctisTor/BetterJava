@@ -1,9 +1,6 @@
 package org.betterJavaApplication.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -12,6 +9,7 @@ import jakarta.persistence.PersistenceContext;
 import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.mead.MeadRecipeEntity;
 import org.betterJavaApplication.repository.mead.MeadRecipeRepository;
+import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.MeadRecipe;
 import org.service.MeadRecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,22 +54,7 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
         List<MeadRecipeEntity> entities = meadRecipeRepository.findAll(pageable).getContent();
 
         return entities.stream().map(entity -> {
-            MeadRecipe recipe = new MeadRecipe();
-            recipe.setRecipeId(entity.getRecipeId());
-            recipe.setName(entity.getName());
-            recipe.setBatchSizeGallons(entity.getBatchSizeGallons());
-            recipe.setAbv(entity.getAbv());
-            recipe.setFlavorNotes(entity.getFlavorNotes());
-
-            try {
-                recipe.setIngredients(mapper.readValue(entity.getIngredients(), new TypeReference<>() {
-                }));
-                recipe.setSteps(mapper.readValue(entity.getSteps(), new TypeReference<>() {
-                }));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to parse mead recipe JSON for recipe ID " + entity.getRecipeId(), e);
-            }
-
+            MeadRecipe recipe = EntityToObjectMapper.toMeadRecipe(entity);
             return recipe;
         }).toList();
     }
@@ -119,6 +102,17 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
                     String.format("There was an error creating mead recipe %s", convertedRecipe.getName()));
         }
         return response;
+    }
+
+    @Override
+    public Optional<MeadRecipe> deleteMeadRecipe(String id) {
+        Optional<MeadRecipeEntity> foundMeadRecipe = meadRecipeRepository.findById(id);
+        if (!foundMeadRecipe.isPresent()) {
+            return Optional.empty();
+        }
+        meadRecipeRepository.delete(foundMeadRecipe.get());
+        MeadRecipe recipe = EntityToObjectMapper.toMeadRecipe(foundMeadRecipe.get());
+        return Optional.of(recipe);
     }
 
 }
