@@ -98,4 +98,8 @@ public class EntityToObjectMapper {
 
         return recipe;
     }
+
+    public static JsonObject toJsonObject(MeadRecipeEntity meadRecipeEntity) {
+        return meadRecipeEntity.toJSONObject();
+    }
 }

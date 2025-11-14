@@ -1,31 +1,26 @@
-package org.betterJavaApplication.service;
+package org.betterJavaApplication.service.mead;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.mead.MeadRecipeEntity;
 import org.betterJavaApplication.repository.mead.MeadRecipeRepository;
 import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.MeadRecipe;
-import org.service.MeadRecipeService;
+import org.service.mead.MeadRecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.MeadRecipeValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PostgresMeadRecipeService implements MeadRecipeService {
 
-    private final PostgresConnector postgresConnector;
     private final MeadRecipeRepository meadRecipeRepository;
     ObjectMapper mapper = new ObjectMapper();
     private final MeadRecipeValidator meadRecipeValidator = new MeadRecipeValidator();
@@ -34,19 +29,8 @@ public class PostgresMeadRecipeService implements MeadRecipeService {
     private EntityManager entityManager;
 
     @Autowired
-    public PostgresMeadRecipeService(PostgresConnector postgresConnector, MeadRecipeRepository meadRecipeRepository) {
-        this.postgresConnector = postgresConnector;
+    public PostgresMeadRecipeService(MeadRecipeRepository meadRecipeRepository) {
         this.meadRecipeRepository = meadRecipeRepository;
-    }
-
-    @PostConstruct
-    public void connect() {
-        this.postgresConnector.connectToPostgres();
-    }
-
-    @PreDestroy
-    public void cleanup() {
-        this.postgresConnector.closeConnection();
     }
 
     @Override

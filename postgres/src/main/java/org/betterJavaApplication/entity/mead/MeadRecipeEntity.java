@@ -2,6 +2,10 @@ package org.betterJavaApplication.entity.mead;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.object.MeadRecipe;
@@ -11,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "mead_recipes")
 public class MeadRecipeEntity {
-
 
     @Id
     @GeneratedValue
@@ -30,7 +33,8 @@ public class MeadRecipeEntity {
     @Column(columnDefinition = "text")
     private String steps;
 
-    protected  MeadRecipeEntity() {}
+    protected MeadRecipeEntity() {
+    }
 
     public MeadRecipeEntity(MeadRecipe meadRecipe) {
         this.recipeId = meadRecipe.getRecipeId();
@@ -52,25 +56,98 @@ public class MeadRecipeEntity {
 
     }
 
+    public JsonObject toJSONObject() {
+        Gson gson = new Gson();
+        JsonObject json = new JsonObject();
+
+        json.addProperty("recipeId", this.recipeId);
+        json.addProperty("name", this.name);
+        if (this.batchSizeGallons != null)
+            json.addProperty("batchSizeGallons", this.batchSizeGallons);
+        if (this.abv != null)
+            json.addProperty("abv", this.abv);
+        if (this.flavorNotes != null)
+            json.addProperty("flavorNotes", this.flavorNotes);
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // ingredients
+            if (this.ingredients != null) {
+                Object ingredientsObj = mapper.readValue(this.ingredients, Object.class);
+                json.add("ingredients", gson.toJsonTree(ingredientsObj));
+            } else {
+                json.add("ingredients", new JsonArray());
+            }
+
+            // steps
+            if (this.steps != null) {
+                Object stepsObj = mapper.readValue(this.steps, Object.class);
+                json.add("steps", gson.toJsonTree(stepsObj));
+            } else {
+                json.add("steps", new JsonArray());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error converting MeadRecipeEntity to JsonObject", e);
+        }
+
+        return json;
+    }
+
     // Getters and setters
-    public String getRecipeId() { return recipeId; }
-    public void setRecipeId(String recipeId) { this.recipeId = recipeId; }
+    public String getRecipeId() {
+        return recipeId;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
+    }
 
-    public Double getBatchSizeGallons() { return batchSizeGallons; }
-    public void setBatchSizeGallons(Double batchSizeGallons) { this.batchSizeGallons = batchSizeGallons; }
+    public String getName() {
+        return name;
+    }
 
-    public Double getAbv() { return abv; }
-    public void setAbv(Double abv) { this.abv = abv; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getFlavorNotes() { return flavorNotes; }
-    public void setFlavorNotes(String flavorNotes) { this.flavorNotes = flavorNotes; }
+    public Double getBatchSizeGallons() {
+        return batchSizeGallons;
+    }
 
-    public String getIngredients() { return ingredients; }
-    public void setIngredients(String ingredients) { this.ingredients = ingredients; }
+    public void setBatchSizeGallons(Double batchSizeGallons) {
+        this.batchSizeGallons = batchSizeGallons;
+    }
 
-    public String getSteps() { return steps; }
-    public void setSteps(String steps) { this.steps = steps; }
+    public Double getAbv() {
+        return abv;
+    }
+
+    public void setAbv(Double abv) {
+        this.abv = abv;
+    }
+
+    public String getFlavorNotes() {
+        return flavorNotes;
+    }
+
+    public void setFlavorNotes(String flavorNotes) {
+        this.flavorNotes = flavorNotes;
+    }
+
+    public String getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public String getSteps() {
+        return steps;
+    }
+
+    public void setSteps(String steps) {
+        this.steps = steps;
+    }
 }

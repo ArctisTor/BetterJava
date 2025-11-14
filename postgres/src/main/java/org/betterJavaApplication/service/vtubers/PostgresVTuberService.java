@@ -1,16 +1,12 @@
-package org.betterJavaApplication.service;
+package org.betterJavaApplication.service.vtubers;
 
-import com.google.gson.Gson;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.vtubers.TalentEntity;
 import org.betterJavaApplication.repository.vtubers.TalentRepository;
 import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.Organization;
 import org.object.Talent;
-import org.service.OrganizationService;
-import org.service.VTuberService;
+import org.service.vtuber.OrganizationService;
+import org.service.vtuber.VTuberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,30 +22,16 @@ import java.util.UUID;
 @Service
 public class PostgresVTuberService implements VTuberService {
 
-    private final PostgresConnector postgresConnector;
     private final TalentRepository talentRepository;
     private final OrganizationService organizationService;
-    private final Gson gson = new Gson();
     private final OrganizationValidator organizationValidator = new OrganizationValidator();
     private final TalentValidator talentValidator;
 
     @Autowired
-    public PostgresVTuberService(PostgresConnector postgresConnector, TalentRepository talentRepository,
-            OrganizationService organizationService) {
-        this.postgresConnector = postgresConnector;
+    public PostgresVTuberService(TalentRepository talentRepository, OrganizationService organizationService) {
         this.talentRepository = talentRepository;
         this.organizationService = organizationService;
         this.talentValidator = new TalentValidator(this.organizationService);
-    }
-
-    @PostConstruct
-    public void connect() {
-        this.postgresConnector.connectToPostgres();
-    }
-
-    @PreDestroy
-    public void cleanup() {
-        this.postgresConnector.closeConnection();
     }
 
     @Override

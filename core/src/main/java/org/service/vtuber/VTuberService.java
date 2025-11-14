@@ -1,4 +1,4 @@
-package org.service;
+package org.service.vtuber;
 
 import org.object.Talent;
 

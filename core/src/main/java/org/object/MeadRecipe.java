@@ -1,6 +1,5 @@
 package org.object;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.util.*;
@@ -19,7 +18,6 @@ public class MeadRecipe extends HashMap<String, Object> {
     public String getRecipeId() {
         return (String) this.get("recipe_id");
     }
-
 
     // Convenience setters
     public void setName(String name) {
@@ -66,8 +64,6 @@ public class MeadRecipe extends HashMap<String, Object> {
         return Collections.emptyList();
     }
 
-
-
     public void setSteps(List<MeadSteps> steps) {
         this.put("steps", steps);
     }
@@ -96,7 +92,6 @@ public class MeadRecipe extends HashMap<String, Object> {
         return Collections.emptyList();
     }
 
-
     // Convenience getters
     public String getName() {
         return (String) this.get("name");
@@ -114,4 +109,3 @@ public class MeadRecipe extends HashMap<String, Object> {
         return (String) this.get("flavor_notes");
     }
 }
-

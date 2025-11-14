@@ -1,4 +1,4 @@
-package org.service;
+package org.service.mead;
 
 import com.google.gson.JsonObject;
 import org.object.MeadRecipe;

@@ -1,14 +1,10 @@
-package org.betterJavaApplication.service;
+package org.betterJavaApplication.service.vtubers;
 
-import com.google.gson.Gson;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.vtubers.OrganizationEntity;
 import org.betterJavaApplication.repository.vtubers.OrganizationRepository;
 import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.Organization;
-import org.service.OrganizationService;
+import org.service.vtuber.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,25 +18,12 @@ import java.util.Optional;
 @Service
 public class PostgresOrganizationService implements OrganizationService {
 
-    private final PostgresConnector postgresConnector;
     private final OrganizationRepository organizationRepository;
     private final OrganizationValidator organizationValidator = new OrganizationValidator();;
 
     @Autowired
-    public PostgresOrganizationService(PostgresConnector postgresConnector,
-            OrganizationRepository organizationRepository) {
-        this.postgresConnector = postgresConnector;
+    public PostgresOrganizationService(OrganizationRepository organizationRepository) {
         this.organizationRepository = organizationRepository;
-    }
-
-    @PostConstruct
-    public void connect() {
-        this.postgresConnector.connectToPostgres();
-    }
-
-    @PreDestroy
-    public void cleanup() {
-        this.postgresConnector.closeConnection();
     }
 
     @Override
