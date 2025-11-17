@@ -36,9 +36,7 @@ jobs:
 
       - name: Copy JAR for upload
         run: |
-          JAR_FILE=$(ls build/libs/*.jar | head -n 1)
-          echo "Found JAR: $JAR_FILE"
-          cp "$JAR_FILE" "build/libs/${{ github.repository }}-master.jar"
+          mv build/libs/BetterJava-1.0-SNAPSHOT.jar build/libs/${{ github.repository }}
 
       - name: Upload Jar artifact
         uses: actions/upload-artifact@v4
