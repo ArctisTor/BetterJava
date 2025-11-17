@@ -31,16 +31,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
 
-      - name: Rename JAR with branch name
+      - name: Rename JAR for upload
         run: |
-          BRANCH=${GITHUB_REF#refs/heads/}
-          for JAR in build/libs/*.jar; do
-            mv "$JAR" "${JAR%.jar}-${BRANCH}.jar"
-          done
+          cp build/libs/*.jar build/libs/${{ github.repository }}-master.jar  
   
       - name: Upload Jar artifact
         uses: actions/upload-artifact@v4
         with:
-          name: built-jar
+          name: ${{ github.repository }}-master
           path: build/libs/*.jar
         
