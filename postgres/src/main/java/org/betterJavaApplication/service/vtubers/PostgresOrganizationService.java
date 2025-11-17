@@ -1,15 +1,13 @@
-package org.betterJavaApplication.service;
+package org.betterJavaApplication.service.vtubers;
 
-import com.google.gson.Gson;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.betterJavaApplication.connector.PostgresConnector;
 import org.betterJavaApplication.entity.vtubers.OrganizationEntity;
 import org.betterJavaApplication.repository.vtubers.OrganizationRepository;
 import org.betterJavaApplication.utils.EntityToObjectMapper;
 import org.object.Organization;
-import org.service.OrganizationService;
+import org.service.vtuber.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.validator.OrganizationValidator;
 
@@ -20,33 +18,19 @@ import java.util.Optional;
 @Service
 public class PostgresOrganizationService implements OrganizationService {
 
-    private final PostgresConnector postgresConnector;
     private final OrganizationRepository organizationRepository;
-    private final Gson gson = new Gson();
-    private final OrganizationValidator organizationValidator = new OrganizationValidator();
-    ;
-
+    private final OrganizationValidator organizationValidator = new OrganizationValidator();;
 
     @Autowired
-    public PostgresOrganizationService(PostgresConnector postgresConnector, OrganizationRepository organizationRepository) {
-        this.postgresConnector = postgresConnector;
+    public PostgresOrganizationService(OrganizationRepository organizationRepository) {
         this.organizationRepository = organizationRepository;
     }
 
-    @PostConstruct
-    public void connect() {
-        this.postgresConnector.connectToPostgres();
-    }
-
-    @PreDestroy
-    public void cleanup() {
-        this.postgresConnector.closeConnection();
-    }
-
     @Override
-    public List<Organization> getAllOrganizations() {
+    public List<Organization> getAllOrganizations(int limit, int offset) {
         List<Organization> organizationList = new ArrayList<>();
-        Iterable<OrganizationEntity> organizationEntities = this.organizationRepository.findAll();
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Iterable<OrganizationEntity> organizationEntities = this.organizationRepository.findAll(pageable).getContent();
         organizationEntities.forEach(organizationEntity -> {
             organizationList.add(EntityToObjectMapper.toOrganizationModel(organizationEntity));
         });
@@ -76,7 +60,7 @@ public class PostgresOrganizationService implements OrganizationService {
     @Override
     public Organization addOrganization(Organization organization) {
         if (this.organizationValidator.isOrganizationValid(organization)) {
-            //TODO will need to implement this
+            // TODO will need to implement this
         }
         return null;
     }

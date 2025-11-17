@@ -1,11 +1,9 @@
 package org.controller;
 
-
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.service.ConfigurationInfoService;
-import org.service.DatabaseTestConnectionService;
+import org.service.heartbeat.DatabaseTestConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/HeartBeat")
+@RequestMapping("api/v1/heartbeat")
 public class HeartBeatController {
 
     @Autowired
@@ -24,14 +22,16 @@ public class HeartBeatController {
     private DatabaseTestConnectionService databaseTestConnectionService;
     private final Gson gson = new Gson();
 
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonObject> getHeartBeat() {
         JsonObject response = new JsonObject();
 
-        //Version Info
+        // Version Info
         response.add("version-number", gson.toJsonTree(configurationInfoService.getVersionNumber()));
-        //Database Test
-        response.add("database-info", databaseTestConnectionService.testConnection());
+        // VTuber Database Test
+        response.add("vtuber-database-info", databaseTestConnectionService.testVtubersConnection());
+        // Mead Database Test
+        response.add("mead-database-info", databaseTestConnectionService.testMeadConnection());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

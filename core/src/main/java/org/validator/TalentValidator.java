@@ -2,7 +2,7 @@ package org.validator;
 
 import org.object.Organization;
 import org.object.Talent;
-import org.service.OrganizationService;
+import org.service.vtuber.OrganizationService;
 
 public class TalentValidator {
 
@@ -17,7 +17,7 @@ public class TalentValidator {
     }
 
     public boolean isTalentValid(Talent talent) {
-        //Must have a name, birthday, organization, and height
+        // Must have a name, birthday, organization, and height
         if (talent.getName() == null || talent.getName().isBlank() ||
                 talent.getBirthday() == null || talent.getBirthday().isBlank() ||
                 talent.getOrganization() == null || talent.getOrganization().isBlank() ||
@@ -31,21 +31,22 @@ public class TalentValidator {
         } catch (RuntimeException e) {
             return false;
         }
-        //The organization must exist in the database first
+        // The organization must exist in the database first
         if (talentOrg == null) {
             return false;
         } else if (!organizationValidator.isOrganizationValid(talentOrg)) {
-            //must be a valid organization
+            // must be a valid organization
             return false;
         } else if (organizationValidator.isValidCorporationOrganization(talentOrg)) {
-            //If the talent is a corporation talent, then they have to have the required fields
+            // If the talent is a corporation talent, then they have to have the required
+            // fields
             return isValidCorporationTalent(talent);
         }
         return true;
     }
 
     public boolean isValidCorporationTalent(Talent talent) {
-        //Corporation talents must be in a unit and have a fan name
+        // Corporation talents must be in a unit and have a fan name
         return !(talent.getUnit() == null || talent.getUnit().isBlank()
                 || talent.getFanName() == null || talent.getFanName().isBlank());
     }
