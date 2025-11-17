@@ -30,11 +30,11 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build
-
+        
       - name: Rename JAR for upload
         run: |
-          cp build/libs/*.jar build/libs/${{ github.repository }}-master.jar  
-  
+          cp build/libs/*.jar build/libs/BetterJava-master.jar
+
       - name: Upload Jar artifact
         uses: actions/upload-artifact@v4
         with:
