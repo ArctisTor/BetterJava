@@ -31,15 +31,24 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
         
-      - name: Show build/libs contents
-        run: ls -l build/libs
+      - name: Set env variables
+        run: |
+          echo "PROJECT_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF_NAME}" >> $GITHUB_ENV
 
       - name: Copy JAR for upload
         run: |
-          echo "BRANCH=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-          echo "PROJECT_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
+          # Use the environment variables now available
+          echo "PROJECT_NAME=$PROJECT_NAME"
+          echo "BRANCH=$BRANCH"
+
+          # Pick the main JAR (ignore -plain)
           MAIN_JAR=$(ls build/libs/*.jar | grep -v 'plain' | head -n 1)
+          echo "Renaming $MAIN_JAR to build/libs/${PROJECT_NAME}-${BRANCH}.jar"
           mv "$MAIN_JAR" "build/libs/${PROJECT_NAME}-${BRANCH}.jar"
+
+          # Confirm the file exists
+          ls -l build/libs
 
       - name: Upload Jar artifact
         uses: actions/upload-artifact@v4
