@@ -31,9 +31,14 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
         
-      - name: Rename JAR for upload
+      - name: Show build/libs contents
+        run: ls -l build/libs
+
+      - name: Copy JAR for upload
         run: |
-          cp build/libs/*.jar build/libs/BetterJava-master.jar
+          JAR_FILE=$(ls build/libs/*.jar | head -n 1)
+          echo "Found JAR: $JAR_FILE"
+          cp "$JAR_FILE" "build/libs/${{ github.repository }}-master.jar"
 
       - name: Upload Jar artifact
         uses: actions/upload-artifact@v4
