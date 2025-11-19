@@ -35,6 +35,11 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://betterjava:9000/api/v1/heartbeat || exit 1"]
+      interval: 5s
+      retries: 20
+      timeout: 5s
     environment:
       spring.datasource.vtubers.jdbc-url: jdbc:postgresql://postgres_db:5432/VTubers
       spring.datasource.vtubers.username: admin
@@ -46,6 +51,18 @@ services:
     networks:
       betterjava_network:
         ipv4_address: 10.5.0.5
+
+  betterfront:
+    image: betterfront:latest
+    container_name: betterfront
+    ports:
+      - "8443:5000"
+    depends_on:
+      betterjava:
+        condition: service_healthy
+    networks:
+      betterjava_network:
+        ipv4_address: 10.5.0.7  
 
 volumes:
   postgres_data:
