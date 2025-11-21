@@ -1,13 +1,12 @@
 name: Start Full Stack – JAR + BetterFront Image
 
 on:
+  push:
+    branches: [ main ]
   workflow_run:
-    workflows:
-      - "build-jar-on-merge"
-    types:
-      - completed
-    branches:
-      - main
+    workflows: [ "build-jar-on-merge" ]
+    types: [ completed ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
