@@ -15,93 +15,27 @@ jobs:
 
     steps:
       # ──────────────────────────────
-      # 1. Get latest successful JAR run
+      # 1. Get latest successful JAR run ID
       # ──────────────────────────────
       - name: Get latest Build JAR run ID
-        id: jar
+        id: jar-run
         run: |
-          gh run list \
+          RUN_ID=$(gh run list \
             --repo ${{ github.repository }} \
             --workflow "Build JAR on Master Merge" \
             --branch master \
             --status success \
             --limit 1 \
             --json databaseId \
-            --jq '.[0].databaseId' >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      # ──────────────────────────────
-      # 2. Download JAR (all artifacts from that run)
-      # ──────────────────────────────
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ steps.jar.outputs.stdout }}
-          path: jar-download
-
-      - name: Move JAR to jar/
-        run: |
-          find jar-download -type f -name "*.jar" -exec cp {} jar/ \;
-          ls -la jar/
-
-      # ──────────────────────────────
-      # 3. Get latest run that has betterfront-docker-image
-      # ──────────────────────────────
-      - name: Find run that uploaded betterfront-docker-image
-        id: docker
-        run: |
-          RUN_ID=$(gh api repos/${{ github.repository }}/actions/artifacts \
-            --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' \
-            | head -n1)
+            --jq '.[0].databaseId // empty')
           
-          if [[ -z "$RUN_ID" ]]; then
-            echo "No unexpired betterfront-docker-image found!"
+          if [[ "$RUN_ID" == "empty" || -z "$RUN_ID" ]]; then
+            echo "No successful JAR build found!"
             exit 1
           fi
           
-          echo "Found betterfront-docker-image in run $RUN_ID"
-          echo "run-id=$RUN_ID" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
+          echo "Found JAR run ID: $RUN_ID"
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       # ──────────────────────────────
-      # 4. Download the Docker image artifact
-      # ──────────────────────────────
-      - name: Download betterfront-docker-image
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ steps.docker.outputs.run-id }}
-          name: betterfront-docker-image          # exact name from your screenshot
-          path: docker-image
-
-      # ──────────────────────────────
-      # Rest of your original steps (unchanged)
-      # ──────────────────────────────
-      - name: Extract JAR and prepare Docker tar
-        run: |
-          mkdir -p extracted-jar
-          cp jar/*.jar extracted-jar/
-          mv docker-image/betterfront-latest.tar .
-
-      - name: Load betterfront image
-        run: docker load --input betterfront-latest.tar
-
-      - name: Run docker compose
-        run: docker compose up --build -d
-
-      - name: Save final image
-        run: |
-          IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
-          docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
-
-      - name: Upload final image
-        uses: actions/upload-artifact@v4
-        with:
-          name: betterjava-compose-image
-          path: betterjava-compose-image.tar.gz
-          retention-days: 30
+      # 2. Download the JAR (
