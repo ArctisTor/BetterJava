@@ -1,0 +1,81 @@
+name: Start Full Stack – JAR + BetterFront Image
+
+on:
+  workflow_run:
+    workflows:
+      - "build-jar-on-merge"
+    types: [ completed ]
+    branches: [ main ]
+  workflow_dispatch:  
+
+jobs:
+  prepare-and-run:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download BetterJava-master (JAR)
+        uses: actions/download-artifact@v4
+        with:
+          name: BetterJava-master
+          path: jar
+        continue-on-error: false   # default, but explicit
+
+      - name: Verify JAR artifact was downloaded
+        run: |
+          if [ ! "$(ls -A jar)" ]; then
+            echo "BetterJava-master artifact is missing or empty!"
+            exit 1
+          fi
+          echo "JAR artifact downloaded successfully"
+
+      - name: Download betterfront-docker-image
+        uses: actions/download-artifact@v4
+        with:
+          name: betterfront-docker-image
+          path: docker-image
+
+      - name: Verify Docker image artifact was downloaded
+        run: |
+          if [ ! -f docker-image/betterfront-latest.tar ]; then
+            echo "betterfront-docker-image artifact is missing or doesn't contain the .tar!"
+            exit 1
+          fi
+          echo "Docker image artifact downloaded successfully"
+
+      - name: Extract JAR and prepare Docker tar
+        run: |
+          # Extract JAR (handles zip or direct .jar)
+          mkdir -p extracted-jar
+          if compgen -G "jar/*.zip" > /dev/null; then
+            unzip -o jar/*.zip -d extracted-jar/
+          elif compgen -G "jar/*.jar" > /dev/null; then
+            cp jar/*.jar extracted-jar/
+          else
+            echo "No JAR file found!"
+            exit 1
+          fi
+          ls -la extracted-jar/
+
+          mv docker-image/betterfront-latest.tar .
+
+      - name: Load betterfront image
+        run: docker load --input betterfront-latest.tar
+
+      - name: Run docker compose (creates the final BetterJava image)
+        run: docker compose up --build -d
+
+      - name: Save ONLY the image created by docker-compose and upload it
+        run: |
+          IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
+          IMAGE_TAG=$(docker inspect --format='{{index .RepoTags 0}}' "$IMAGE_NAME")
+          docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
+          echo "Saved image: $IMAGE_TAG"   
+
+      - name: Upload the final compose image
+        uses: actions/upload-artifact@v4
+        with:
+          name: betterjava-compose-image
+          path: betterjava-compose-image.tar.gz
+          retention-days: 30
+
+      
