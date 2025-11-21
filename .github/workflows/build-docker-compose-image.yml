@@ -7,6 +7,10 @@ on:
     workflows: ["Build JAR on Master Merge"]
     types: [completed]
   workflow_dispatch:
+  
+permissions:
+  contents: read
+  actions: read          
 
 jobs:
   prepare-and-run:
@@ -17,13 +21,12 @@ jobs:
        github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
-      - name: Download JAR artifact from Build JAR workflow
-        uses: dawidd6/action-download-artifact@v6
+      - name: Download JAR artifact (BetterJava-master)
+        uses: dawidd6/action-download-artifact@v11
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: Build JAR on Master Merge   # exact workflow name
-          branch: master
-          name: BetterJava-master               # exact artifact name it uploads
+          run_id: ${{ github.event.workflow_run.id }}   # ← direct link to the run that just finished
+          name: BetterJava-master                       # ← exact name your build workflow uploads
           path: jar
           if_no_artifact_found: fail
 
