@@ -1,4 +1,4 @@
-name: Start Full Stack – JAR + BetterFront Image
+name: Build & Upload BetterJava Final Image
 
 on:
   workflow_dispatch:
@@ -10,43 +10,43 @@ permissions:
   actions: read
 
 jobs:
-  start-full-stack:
+  build-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code (gets your docker-compose.yml from root)
+      - name: Checkout code (gets docker-compose.yml + Dockerfile)
         uses: actions/checkout@v4
 
+      # 1. Download JAR artifact (it's a ZIP)
       - name: Get latest successful JAR run ID
         id: jar
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          RUN_ID=$(gh run list --repo ${{ github.repository }} --workflow "Build JAR on Master Merge" --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-          echo "jar_run_id=$RUN_ID" >> $GITHUB_OUTPUT
+        run: echo "jar_run_id=$(gh run list --repo ${{ github.repository }} --workflow "Build JAR on Master Merge" --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId')" >> $GITHUB_OUTPUT
 
-      - name: Download JAR
+      - name: Download JAR artifact
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
           run-id: ${{ steps.jar.outputs.jar_run_id }}
           path: jar-download
 
-      - name: Put JAR in place
+      # 2. Extract JAR from ZIP and put it where Dockerfile expects
+      - name: Place JAR correctly for Dockerfile
         run: |
-          mkdir -p jar
-          cp jar-download/*/*.jar jar/ 2>/dev/null || cp jar-download/*.jar jar/
-          ls -la jar/
+          mkdir -p BetterJavaApplication/build/libs
+          unzip -jo "jar-download"/*.zip "*.jar" -d BetterJavaApplication/build/libs/
+          mv BetterJavaApplication/build/libs/*.jar BetterJavaApplication/build/libs/BetterJavaApplication-1.0-SNAPSHOT.jar
+          ls -la BetterJavaApplication/build/libs/
 
-      - name: Get run that has betterfront-docker-image
+      # 3. Download betterfront image
+      - name: Get run with betterfront-docker-image
         id: docker
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          RUN_ID=$(gh api "/repos/${{ github.repository }}/actions/artifacts" --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' | head -n1)
-          echo "docker_run_id=$RUN_ID" >> $GITHUB_OUTPUT
+        run: echo "docker_run_id=$(gh api "/repos/${{ github.repository }}/actions/artifacts" --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' | head -n1)" >> $GITHUB_OUTPUT
 
-      - name: Download betterfront-docker-image
+      - name: Download & load betterfront image
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
@@ -54,26 +54,24 @@ jobs:
           name: betterfront-docker-image
           path: docker-image
 
-      - name: Extract JAR & move Docker tar
-        run: |
-          mkdir -p extracted-jar
-          cp jar/*.jar extracted-jar/
-          mv docker-image/betterfront-latest.tar .
-
       - name: Load betterfront image
-        run: docker load -i betterfront-latest.tar
+        run: docker load -i docker-image/betterfront-latest.tar
 
-      - name: Start full stack (docker-compose.yml is in root → works!)
-        run: docker compose up --build -d
+      # 4. BUILD ONLY the betterjava image (no up, no containers started)
+      - name: Build final betterjava image
+        run: |
+          docker compose build betterjava
+          echo "Image built:"
+          docker images betterjava:latest
 
+      # 5. Export & upload
       - name: Export final image
         run: |
-          IMAGE_ID=$(docker compose ps -q betterjava | head -n1)
-          docker save $(docker inspect --format='{{.Image}}' $IMAGE_ID) | gzip > betterjava-compose-image.tar.gz
+          docker save betterjava:latest | gzip > betterjava-final-image.tar.gz
 
       - name: Upload final image
         uses: actions/upload-artifact@v4
         with:
-          name: betterjava-compose-image
-          path: betterjava-compose-image.tar.gz
+          name: betterjava-final-image
+          path: betterjava-final-image.tar.gz
           retention-days: 30
