@@ -10,93 +10,66 @@ permissions:
   actions: read
 
 jobs:
-  prepare-and-run:
+  start-full-stack:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------------------------
-      # 1. Download JAR from latest successful Build JAR run
-      # -------------------------------------------------
-      - name: Get latest successful Build JAR run ID
+      - name: Checkout code (gets your docker-compose.yml from root)
+        uses: actions/checkout@v4
+
+      - name: Get latest successful JAR run ID
         id: jar
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RUN_ID=$(gh run list \
-            --repo ${{ github.repository }} \
-            --workflow "Build JAR on Master Merge" \
-            --branch master \
-            --status success \
-            --limit 1 \
-            --json databaseId \
-            --jq '.[0].databaseId')
-
-          echo "JAR run ID: $RUN_ID"
+          RUN_ID=$(gh run list --repo ${{ github.repository }} --workflow "Build JAR on Master Merge" --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId')
           echo "jar_run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
-      - name: Download JAR artifact
+      - name: Download JAR
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
           run-id: ${{ steps.jar.outputs.jar_run_id }}
           path: jar-download
 
-      - name: Move JAR to jar/
+      - name: Put JAR in place
         run: |
           mkdir -p jar
-          find jar-download -name "*.jar" -exec cp {} jar/ \;
+          cp jar-download/*/*.jar jar/ 2>/dev/null || cp jar-download/*.jar jar/
           ls -la jar/
-          test -f jar/*.jar || (echo "No JAR found!" && exit 1)
 
-      # -------------------------------------------------
-      # 2. Download betterfront-docker-image from any recent run
-      # -------------------------------------------------
-      - name: Get run ID that contains betterfront-docker-image
+      - name: Get run that has betterfront-docker-image
         id: docker
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RUN_ID=$(gh api -X GET "/repos/${{ github.repository }}/actions/artifacts" \
-            --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' \
-            | head -n1)
-
-          if [[ -z "$RUN_ID" ]]; then
-            echo "No unexpired betterfront-docker-image artifact found!"
-            exit 1
-          fi
-
-          echo "Found betterfront-docker-image in run $RUN_ID"
+          RUN_ID=$(gh api "/repos/${{ github.repository }}/actions/artifacts" --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' | head -n1)
           echo "docker_run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       - name: Download betterfront-docker-image
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
           run-id: ${{ steps.docker.outputs.docker_run_id }}
           name: betterfront-docker-image
           path: docker-image
 
-      # -------------------------------------------------
-      # 3. Your original steps
-      # -------------------------------------------------
-      - name: Extract JAR and move Docker tar
+      - name: Extract JAR & move Docker tar
         run: |
           mkdir -p extracted-jar
           cp jar/*.jar extracted-jar/
           mv docker-image/betterfront-latest.tar .
 
       - name: Load betterfront image
-        run: docker load --input betterfront-latest.tar
+        run: docker load -i betterfront-latest.tar
 
-      - name: Run docker compose
+      - name: Start full stack (docker-compose.yml is in root → works!)
         run: docker compose up --build -d
 
-      - name: Save final image
+      - name: Export final image
         run: |
-          IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
-          docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
+          IMAGE_ID=$(docker compose ps -q betterjava | head -n1)
+          docker save $(docker inspect --format='{{.Image}}' $IMAGE_ID) | gzip > betterjava-compose-image.tar.gz
 
       - name: Upload final image
         uses: actions/upload-artifact@v4
