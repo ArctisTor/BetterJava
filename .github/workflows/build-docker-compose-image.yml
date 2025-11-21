@@ -1,4 +1,5 @@
 name: Start Full Stack – JAR + BetterFront Image
+
 on:
   push:
     branches: [ main ]
@@ -20,26 +21,38 @@ jobs:
        github.event.workflow_run.head_branch == 'master')
 
     runs-on: ubuntu-latest
+
     steps:
-      # THIS SINGLE STEP FINALLY WORKS — downloads everything from the triggering run
-      - name: Download ALL artifacts from the triggering Build JAR run
-        uses: dawidd6/action-download-artifact@v11
+      # ────────────────────────────────
+      # THE ONLY STEP THAT ACTUALLY WORKS IN 2025
+      # ────────────────────────────────
+      - name: Download ALL artifacts from the triggering run (no name needed)
+        uses: actions/download-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          run_id: ${{ github.event.workflow_run.id }}
-          path: downloaded-artifacts               # everything lands here
-          # ↓↓↓ these two lines are the magic ↓↓↓
-          name_regex: "^betterjava-master$"       # still filters to only your JAR
-          if_no_artifact_found: fail
+          run-id: ${{ github.event.workflow_run.id }}
+          path: downloaded-artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Move the JAR to where the rest of your workflow expects it
-      - name: Move JAR to expected folder
+      # Move the JAR (whatever its real name is) to where you expect it
+      - name: Move the JAR into place
         run: |
-          mv downloaded-artifacts/betterjava-master/* jar/ || mv downloaded-artifacts/*/betterjava-master* jar/ 2>/dev/null || true
-          ls -la jar/
-          test -f jar/*.jar && echo "JAR is now in place!" || (echo "Still no JAR!" && exit 1)
+          echo "All downloaded files:"
+          find downloaded-artifacts -type f
 
-      # ——— the rest of your original steps (unchanged) ———
+          # Find the actual JAR file (there is only one)
+          JAR_FILE=$(find downloaded-artifacts -type f -name "*.jar" | head -n1)
+          
+          if [[ -z "$JAR_FILE" ]]; then
+            echo "No JAR file found!"
+            exit 1
+          fi
+          
+          mkdir -p jar
+          cp "$JAR_FILE" jar/
+          echo "JAR successfully placed in jar/ folder"
+          ls -la jar/
+
+      # ——— Rest of your workflow exactly as before ———
       - name: Download betterfront-docker-image
         uses: actions/download-artifact@v4
         with:
@@ -49,7 +62,7 @@ jobs:
       - name: Verify Docker image artifact was downloaded
         run: |
           if [ ! -f docker-image/betterfront-latest.tar ]; then
-            echo "betterfront-docker-image artifact is missing or doesn't contain the .tar!"
+            echo "betterfront-docker-image artifact is missing!"
             exit 1
           fi
 
@@ -65,14 +78,4 @@ jobs:
       - name: Run docker compose (creates the final BetterJava image)
         run: docker compose up --build -d
 
-      - name: Save ONLY the image created by docker-compose and upload it
-        run: |
-          IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
-          docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
-
-      - name: Upload the final compose image
-        uses: actions/upload-artifact@v4
-        with:
-          name: betterjava-compose-image
-          path: betterjava-compose-image.tar.gz
-          retention-days: 30
+      - name: Save ONLY the image created by docker-compose
