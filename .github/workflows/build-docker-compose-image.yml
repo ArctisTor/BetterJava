@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: [ "build-jar-on-merge" ]
+    workflows: [ "Build JAR on Master Merge" ]
     types: [ completed ]
     branches: [ main ]
   workflow_dispatch:
