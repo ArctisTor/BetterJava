@@ -22,6 +22,7 @@ jobs:
         with:
           name: BetterJava-master
           path: jar
+          workflow_run_id: ${{ github.event.workflow_run.id }}
         continue-on-error: false   # default, but explicit
 
       - name: Verify JAR artifact was downloaded
