@@ -20,7 +20,7 @@ jobs:
       - name: Download JAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ github.event.workflow_run.head_repository.name }}-main
+          name: BetterJava-main
           path: jar
           workflow_run_id: ${{ github.event.workflow_run.id }}
 
