@@ -10,7 +10,7 @@ on:
 
 permissions:
   contents: read
-  actions: read
+  actions: read          # Required for cross-run artifact access
 
 jobs:
   prepare-and-run:
@@ -24,35 +24,37 @@ jobs:
 
     steps:
       # ────────────────────────────────
-      # THE ONLY STEP THAT ACTUALLY WORKS IN 2025
+      # FIXED: Official download with run-id & token (downloads ALL artifacts from triggering run)
       # ────────────────────────────────
-      - name: Download ALL artifacts from the triggering run (no name needed)
+      - name: Download ALL artifacts from Build JAR run
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id }}
-          path: downloaded-artifacts
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.token }}                 # ← REQUIRED for cross-run
+          run-id: ${{ github.event.workflow_run.id }}       # ← FIXED: hyphen, targets exact run
+          path: downloaded-artifacts                       # Downloads everything here
 
-      # Move the JAR (whatever its real name is) to where you expect it
-      - name: Move the JAR into place
+      # Find & move the JAR (ignores name—grabs the .jar file directly)
+      - name: Move JAR to expected location
         run: |
-          echo "All downloaded files:"
+          echo "Downloaded contents:"
           find downloaded-artifacts -type f
 
-          # Find the actual JAR file (there is only one)
+          # Grab the JAR (only one exists)
           JAR_FILE=$(find downloaded-artifacts -type f -name "*.jar" | head -n1)
           
           if [[ -z "$JAR_FILE" ]]; then
-            echo "No JAR file found!"
+            echo "❌ No JAR found in artifacts!"
             exit 1
           fi
           
           mkdir -p jar
           cp "$JAR_FILE" jar/
-          echo "JAR successfully placed in jar/ folder"
+          echo "✅ JAR moved to jar/ (size: $(ls -lh jar/*.jar))"
           ls -la jar/
 
-      # ——— Rest of your workflow exactly as before ———
+      # ────────────────────────────────
+      # Rest of your steps (unchanged, but simplified verification)
+      # ────────────────────────────────
       - name: Download betterfront-docker-image
         uses: actions/download-artifact@v4
         with:
@@ -62,14 +64,23 @@ jobs:
       - name: Verify Docker image artifact was downloaded
         run: |
           if [ ! -f docker-image/betterfront-latest.tar ]; then
-            echo "betterfront-docker-image artifact is missing!"
+            echo "betterfront-docker-image artifact is missing or doesn't contain the .tar!"
             exit 1
           fi
+          echo "Docker image downloaded successfully"
 
       - name: Extract JAR and prepare Docker tar
         run: |
           mkdir -p extracted-jar
-          cp jar/*.jar extracted-jar/
+          if compgen -G "jar/*.zip" > /dev/null; then
+            unzip -o jar/*.zip -d extracted-jar/
+          elif compgen -G "jar/*.jar" > /dev/null; then
+            cp jar/*.jar extracted-jar/
+          else
+            echo "No JAR file found!"
+            exit 1
+          fi
+          ls -la extracted-jar/
           mv docker-image/betterfront-latest.tar .
 
       - name: Load betterfront image
@@ -78,4 +89,16 @@ jobs:
       - name: Run docker compose (creates the final BetterJava image)
         run: docker compose up --build -d
 
-      - name: Save ONLY the image created by docker-compose
+      - name: Save ONLY the image created by docker-compose and upload it
+        run: |
+          IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
+          IMAGE_TAG=$(docker inspect --format='{{index .RepoTags 0}}' "$IMAGE_NAME" || echo "untagged")
+          docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
+          echo "Saved image: $IMAGE_TAG"
+
+      - name: Upload the final compose image
+        uses: actions/upload-artifact@v4
+        with:
+          name: betterjava-compose-image
+          path: betterjava-compose-image.tar.gz
+          retention-days: 30
