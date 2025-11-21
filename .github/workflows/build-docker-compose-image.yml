@@ -17,13 +17,13 @@ jobs:
        github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
-      - name: Download BetterJava-master (JAR)
+      - name: Download JAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: BetterJava-master
+          name: ${{ github.event.workflow_run.head_repository.name }}-main
           path: jar
           workflow_run_id: ${{ github.event.workflow_run.id }}
-        continue-on-error: false   # default, but explicit
+
 
       - name: Verify JAR artifact was downloaded
         run: |
