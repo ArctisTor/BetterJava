@@ -4,16 +4,14 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: [ "Build JAR on Master Merge" ]
-    types: [ completed ]
-    branches: [ main ]
+    workflows: ["Build JAR on Master Merge"]
+    types: [completed]
   workflow_dispatch:
 
 jobs:
   prepare-and-run:
     if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
