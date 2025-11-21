@@ -1,32 +1,27 @@
 name: Cache latest BetterFront Docker image
 
 on:
-  workflow_run:
-    workflows: ["build-nodejs-server"]     # name of the workflow in BetterFront repo
-    types:
-      - completed
-    branches:
-      - main
+  repository_dispatch:
+    types: [betterfront-built]
+  workflow_dispatch:   
 
 jobs:
-  save-image-as-artifact:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == 'ArctisTor/BetterFront' }}
+  cache:
     runs-on: ubuntu-latest
     steps:
-      - name: Download betterfront-docker-image from BetterFront
+      - name: Download artifact from BetterFront
         uses: dawidd6/action-download-artifact@v6
         with:
-          github_token: ${{ secrets.GH_PAT }}
+          github_token: ${{ secrets.GH_PAT }}  # Your existing secret
           repo: ArctisTor/BetterFront
           workflow: build-nodejs-server.yml
           name: betterfront-docker-image
           path: downloaded
-          if_no_artifact_found: fail
 
-      - name: Re-upload as artifact in betterjava repo
+      - name: Re-upload as local artifact
         uses: actions/upload-artifact@v4
         with:
           name: betterfront-docker-image
           path: downloaded/betterfront-latest.tar
           retention-days: 90
-          overwrite: true   # always keep only the newest one
+          overwrite: true
