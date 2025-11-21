@@ -4,9 +4,11 @@ on:
   workflow_run:
     workflows:
       - "build-jar-on-merge"
-    types: [ completed ]
-    branches: [ main ]
-  workflow_dispatch:  
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   prepare-and-run:
