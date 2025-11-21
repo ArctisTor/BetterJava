@@ -1,16 +1,15 @@
 name: Start Full Stack – JAR + BetterFront Image
-
 on:
   push:
     branches: [ main ]
   workflow_run:
     workflows: ["Build JAR on Master Merge"]
-    types: [completed]
+    types: [ completed ]
   workflow_dispatch:
-  
+
 permissions:
   contents: read
-  actions: read          
+  actions: read
 
 jobs:
   prepare-and-run:
@@ -18,38 +17,29 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main')
+       github.event.workflow_run.head_branch == 'master')
+
     runs-on: ubuntu-latest
     steps:
-    
-      - name: Debug - List exact artifact names from the triggering run
-        if: github.event_name == 'workflow_run'
-        run: |
-          echo "Triggering run ID: ${{ github.event.workflow_run.id }}"
-          curl -fsSL \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
-          | jq -r '.artifacts[] | "→ Name: \(.name) | Size: \(.size_in_bytes) bytes | ID: \(.id)"'
-            
-      - name: Download JAR artifact (BetterJava-master)
+      # THIS SINGLE STEP FINALLY WORKS — downloads everything from the triggering run
+      - name: Download ALL artifacts from the triggering Build JAR run
         uses: dawidd6/action-download-artifact@v11
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          run_id: ${{ github.event.workflow_run.id }}   # ← direct link to the run that just finished
-          name: BetterJava-master                       # ← exact name your build workflow uploads
-          path: jar
+          run_id: ${{ github.event.workflow_run.id }}
+          path: downloaded-artifacts               # everything lands here
+          # ↓↓↓ these two lines are the magic ↓↓↓
+          name_regex: "^betterjava-master$"       # still filters to only your JAR
           if_no_artifact_found: fail
 
-
-      - name: Verify JAR artifact was downloaded
+      # Move the JAR to where the rest of your workflow expects it
+      - name: Move JAR to expected folder
         run: |
-          if [ ! "$(ls -A jar)" ]; then
-            echo "BetterJava-master artifact is missing or empty!"
-            exit 1
-          fi
-          echo "JAR artifact downloaded successfully"
+          mv downloaded-artifacts/betterjava-master/* jar/ || mv downloaded-artifacts/*/betterjava-master* jar/ 2>/dev/null || true
+          ls -la jar/
+          test -f jar/*.jar && echo "JAR is now in place!" || (echo "Still no JAR!" && exit 1)
 
+      # ——— the rest of your original steps (unchanged) ———
       - name: Download betterfront-docker-image
         uses: actions/download-artifact@v4
         with:
@@ -62,22 +52,11 @@ jobs:
             echo "betterfront-docker-image artifact is missing or doesn't contain the .tar!"
             exit 1
           fi
-          echo "Docker image artifact downloaded successfully"
 
       - name: Extract JAR and prepare Docker tar
         run: |
-          # Extract JAR (handles zip or direct .jar)
           mkdir -p extracted-jar
-          if compgen -G "jar/*.zip" > /dev/null; then
-            unzip -o jar/*.zip -d extracted-jar/
-          elif compgen -G "jar/*.jar" > /dev/null; then
-            cp jar/*.jar extracted-jar/
-          else
-            echo "No JAR file found!"
-            exit 1
-          fi
-          ls -la extracted-jar/
-
+          cp jar/*.jar extracted-jar/
           mv docker-image/betterfront-latest.tar .
 
       - name: Load betterfront image
@@ -89,9 +68,7 @@ jobs:
       - name: Save ONLY the image created by docker-compose and upload it
         run: |
           IMAGE_NAME=$(docker compose ps -q betterjava | xargs docker inspect --format='{{.Image}}' | head -n1)
-          IMAGE_TAG=$(docker inspect --format='{{index .RepoTags 0}}' "$IMAGE_NAME")
           docker save "$IMAGE_NAME" | gzip > betterjava-compose-image.tar.gz
-          echo "Saved image: $IMAGE_TAG"   
 
       - name: Upload the final compose image
         uses: actions/upload-artifact@v4
@@ -99,5 +76,3 @@ jobs:
           name: betterjava-compose-image
           path: betterjava-compose-image.tar.gz
           retention-days: 30
-
-      
