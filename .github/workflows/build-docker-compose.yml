@@ -1,0 +1,83 @@
+name: Build & Upload Final BetterJava Image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-final:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Download JAR artifact (ZIP or .jar — handles both)
+      - name: Get latest successful JAR run
+        id: jar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "jar_run_id=$(gh run list --repo ${{ github.repository }} --workflow "Build JAR on Master Merge" --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId')" >> $GITHUB_OUTPUT
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.jar.outputs.jar_run_id }}
+          path: jar-download
+
+      # 2. Extract JAR and put it exactly where Dockerfile expects
+      - name: Place JAR correctly
+        run: |
+          mkdir -p BetterJavaApplication/build/libs
+
+          if ls jar-download/*.zip >/dev/null 2>&1; then
+            unzip -jo jar-download/*.zip "*.jar" -d BetterJavaApplication/build/libs/
+          else
+            cp jar-download/*.jar BetterJavaApplication/build/libs/
+          fi
+
+          mv BetterJavaApplication/build/libs/*.jar BetterJavaApplication/build/libs/BetterJavaApplication-1.0-SNAPSHOT.jar
+
+          echo "JAR is ready:"
+          ls -la BetterJavaApplication/build/libs/
+
+      # 3. Download & load betterfront image
+      - name: Get betterfront image run
+        id: front
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "front_run_id=$(gh api "/repos/${{ github.repository }}/actions/artifacts" --jq '.artifacts[] | select(.name=="betterfront-docker-image" and .expired==false) | .workflow_run.id' | head -n1)" >> $GITHUB_OUTPUT
+
+      - name: Download & load betterfront image
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.front.outputs.front_run_id }}
+          name: betterfront-docker-image
+          path: tmp-front
+      - run: docker load -i tmp-front/betterfront-latest.tar
+
+      # 4. Build ONLY the final image (no up, no containers)
+      - name: Build final betterjava image
+        run: |
+          cat > Dockerfile <<'EOF'
+          FROM eclipse-temurin:21-jdk-jammy
+          COPY BetterJavaApplication/build/libs/BetterJavaApplication-1.0-SNAPSHOT.jar app.jar
+          EXPOSE 9000
+          CMD ["java", "-jar", "app.jar"]
+          EOF
+
+          docker build -t betterjava:latest .
+
+      # 5. Export & upload
+      - name: Export final image
+        run: docker save betterjava:latest | gzip > betterjava-final-image.tar.gz
+
+      - name: Upload final image
+        uses: actions/upload-artifact@v4
+        with:
+          name: betterjava-final-image
+          path: betterjava-final-image.tar.gz
+          retention-days: 30
