@@ -14,11 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ──────────────────────────────
-      # 1. Get latest successful JAR run ID
-      # ──────────────────────────────
-      - name: Get latest Build JAR run ID
-        id: jar-run
+      # -------------------------------------------------
+      # 1. Download the JAR (latest successful build on master)
+      # -------------------------------------------------
+      - name: Get latest successful Build JAR run ID
+        id: jar
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           RUN_ID=$(gh run list \
             --repo ${{ github.repository }} \
@@ -27,15 +29,34 @@ jobs:
             --status success \
             --limit 1 \
             --json databaseId \
-            --jq '.[0].databaseId // empty')
-          
-          if [[ "$RUN_ID" == "empty" || -z "$RUN_ID" ]]; then
-            echo "No successful JAR build found!"
-            exit 1
-          fi
-          
-          echo "Found JAR run ID: $RUN_ID"
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+            --jq '.[0].databaseId')
 
-      # ──────────────────────────────
-      # 2. Download the JAR (
+          echo "JAR run ID: $RUN_ID"
+          echo "jar_run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.jar.outputs.jar_run_id }}
+          path: jar-download
+
+      - name: Move JAR to jar/
+        run: |
+          mkdir -p jar
+          find jar-download -type f -name "*.jar" -exec mv {} jar/ \;
+          ls -la jar/
+          test -f jar/*.jar || (echo "No JAR!" && exit 1)
+
+      # -------------------------------------------------
+      # 2. Download the Docker image (latest unexpired betterfront-docker-image)
+      # -------------------------------------------------
+      - name: Get run ID that has betterfront-docker-image
+        id: docker
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=$(gh api "repos/${{ github.repository }}/actions/artifacts" \
+            --jq '.artifacts[] 
+                   | select(.name=="betterfront-docker-image" and .expired==false) 
