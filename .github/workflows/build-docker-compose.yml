@@ -51,7 +51,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: Build Docker Compose images
-        run: docker-compose -f ./docker-compose.yaml build
+        run: docker compose -f ./docker-compose.yaml build
 
       - name: Verify BetterFront Docker image
         run: |
