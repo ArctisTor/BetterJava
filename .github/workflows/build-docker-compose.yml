@@ -1,3 +1,5 @@
+name: Build Docker Compose
+
 on:
   push:
     branches: [master]
@@ -12,11 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - name: Download BetterFront Docker artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
-          name: betterfront-docker-image
-          path: ./artifact
+          github_token: ${{ secrets.GH_PAT }}   # must have repo access
+          repo: ${{ github.repository }}        # same repo
+          workflow: cache-betterfront-image.yml              
+          name: betterfront-docker-image        
+          path: ./downloaded
+          branch: main                           
 
       - name: List downloaded files
         run: ls -R .          
