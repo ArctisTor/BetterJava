@@ -51,13 +51,18 @@ jobs:
         run: ./gradlew clean build
 
       - name: Build Docker Compose images
-        run: docker compose -f ./docker-compose.yaml build
+        run: docker compose -f ./docker-compose.yaml up -d --no-start
 
       - name: Verify Docker Compose images built
         run: |
-          docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^betterjava:latest$' \
-          && echo "✅ betterjava image built" \
-          || (echo "❌ betterjava image NOT built" && exit 1)
+          IMAGE_ID=$(docker inspect --format='{{.Image}}' java_backend)
+          if [ -n "$IMAGE_ID" ]; then
+            echo "✅ betterjava image built successfully (ID: $IMAGE_ID)"
+          else
+            echo "❌ betterjava image NOT built"
+            docker images
+            exit 1
+          fi
    
    
     
