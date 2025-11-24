@@ -76,6 +76,7 @@ jobs:
         with:
           name: betterjava-docker-image
           path: betterjava-latest.tar
+          retention-days: 30
 
 
    
