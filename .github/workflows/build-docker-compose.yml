@@ -65,7 +65,7 @@ jobs:
           fi
 
       - name: Save betterjava Docker image
-        run: docker save -o betterjava-latest.tar betterjava:latest
+        run: docker save -o betterjava-latest.tar betterjava-betterjava
 
       - name: Upload betterjava Docker image artifact
         uses: actions/upload-artifact@v4
