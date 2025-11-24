@@ -23,5 +23,13 @@ jobs:
           name: betterfront-docker-image        
           path: ./downloaded                           
 
-      - name: List downloaded files
-        run: ls -R .          
+      - name: Load Docker image
+        run: docker load -i ./downloaded/betterfront-latest.tar
+
+      - name: Verify Docker image exists
+        run: |
+          docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^betterfront:latest$' \
+          && echo "Image found ✅" \
+          || (echo "Image NOT found ❌" && exit 1)
+  
+       
