@@ -53,11 +53,11 @@ jobs:
       - name: Build Docker Compose images
         run: docker compose -f ./docker-compose.yaml build
 
-      - name: Verify BetterFront Docker image
+      - name: Verify Docker Compose images built
         run: |
-          docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^betterfront:latest$' \
-          && echo "BetterFront image built ✅" \
-          || (echo "BetterFront image not found ❌" && exit 1)
+          docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^betterjava:latest$' \
+          && echo "✅ betterjava image built" \
+          || (echo "❌ betterjava image NOT built" && exit 1)
    
    
     
