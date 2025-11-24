@@ -3,7 +3,11 @@ name: Build Docker Compose
 on:
   push:
     branches: [master]
-  workflow_dispatch:  
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Cache latest BetterFront Docker image"]
+    types:
+      - completed
 
 permissions:
   contents: read
