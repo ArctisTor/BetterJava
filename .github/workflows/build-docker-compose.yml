@@ -21,8 +21,7 @@ jobs:
           repo: ${{ github.repository }}        # same repo
           workflow: cache-betterfront-image.yml              
           name: betterfront-docker-image        
-          path: ./downloaded
-          branch: main                           
+          path: ./downloaded                           
 
       - name: List downloaded files
         run: ls -R .          
